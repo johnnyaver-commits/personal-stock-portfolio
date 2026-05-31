@@ -202,7 +202,7 @@ export default function TradeForm({ onSubmit }) {
             <input id="price" name="price" type="number" step="0.01" min="0" value={form.price} onChange={updateField} required />
           </div>
           <div className="field">
-            <label htmlFor="quantity">股數</label>
+            <label htmlFor="quantity">數量（股）</label>
             <input id="quantity" name="quantity" type="number" step="0.0001" min="0" value={form.quantity} onChange={updateField} required />
           </div>
         </div>

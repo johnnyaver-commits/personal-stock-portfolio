@@ -28,7 +28,7 @@ export default function HoldingsTable({ holdings, deletingId, onDelete }) {
             <tr>
               <th>代號</th>
               <th>名稱</th>
-              <th>數量</th>
+              <th>數量（股）</th>
               <th>平均成本</th>
               <th>現價</th>
               <th>市值</th>
@@ -49,7 +49,7 @@ export default function HoldingsTable({ holdings, deletingId, onDelete }) {
                     <div className="subtle">{holding.currency}</div>
                   </td>
                   <td data-label="名稱">{holding.name}</td>
-                  <td data-label="數量">{number(holding.quantity)}</td>
+                  <td data-label="數量（股）">{number(holding.quantity)}</td>
                   <td data-label="平均成本">{money(holding.avg_cost, holding.currency)}</td>
                   <td data-label="現價">{money(holding.current_price, holding.currency)}</td>
                   <td data-label="市值">{money(holding.market_value, holding.currency)}</td>
