@@ -8,11 +8,19 @@ const initialForm = {
   trade_date: new Date().toISOString().slice(0, 10),
   symbol: "2330.TW",
   symbol_name: "台積電",
+  market: "台股",
+  currency: "TWD",
   type: "buy",
   price: "600",
   quantity: "100",
   fee: "20"
 };
+
+function defaultCurrency(symbol, market) {
+  const normalizedSymbol = String(symbol ?? "").toUpperCase();
+  if (market === "台股" || normalizedSymbol.endsWith(".TW") || normalizedSymbol.endsWith(".TWO")) return "TWD";
+  return "USD";
+}
 
 export default function TradeForm({ onSubmit }) {
   const [form, setForm] = useState(initialForm);
@@ -24,11 +32,22 @@ export default function TradeForm({ onSubmit }) {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((current) => ({
-      ...current,
-      [name]: name === "symbol" ? value.toUpperCase() : value,
-      ...(name === "symbol" ? { symbol_name: "" } : {})
-    }));
+    const nextValue = name === "symbol" ? value.toUpperCase() : value;
+
+    setForm((current) => {
+      const inferredMarket = nextValue.endsWith(".TW") || nextValue.endsWith(".TWO") ? "台股" : "";
+      return {
+        ...current,
+        [name]: nextValue,
+        ...(name === "symbol"
+          ? {
+              symbol_name: "",
+              market: inferredMarket,
+              currency: defaultCurrency(nextValue, inferredMarket)
+            }
+          : {})
+      };
+    });
 
     if (name === "symbol") {
       setShowSuggestions(true);
@@ -69,7 +88,9 @@ export default function TradeForm({ onSubmit }) {
     setForm((current) => ({
       ...current,
       symbol: suggestion.symbol,
-      symbol_name: suggestion.name
+      symbol_name: suggestion.name,
+      market: suggestion.market,
+      currency: suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)
     }));
     setSuggestions([]);
     setShowSuggestions(false);
@@ -82,6 +103,7 @@ export default function TradeForm({ onSubmit }) {
       await onSubmit({
         ...form,
         name: form.symbol_name,
+        currency: form.currency || defaultCurrency(form.symbol, form.market),
         price: Number(form.price),
         quantity: Number(form.quantity),
         fee: Number(form.fee)
@@ -140,17 +162,19 @@ export default function TradeForm({ onSubmit }) {
                         <strong>{suggestion.symbol}</strong>
                         <small>{suggestion.name}</small>
                       </span>
-                      <em>{suggestion.market}</em>
+                      <em>{suggestion.market} · {suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)}</em>
                     </button>
                   ))
                 : null}
             </div>
           ) : null}
-          {form.symbol_name ? <span className="status">已選擇：{form.symbol_name}</span> : null}
+          <span className="status">
+            {form.symbol_name ? `已選擇：${form.symbol_name} · ${form.currency}` : `幣別：${form.currency}`}
+          </span>
         </div>
         <div className="form-row">
           <div className="field">
-            <label htmlFor="price">價格</label>
+            <label htmlFor="price">價格（{form.currency}）</label>
             <input id="price" name="price" type="number" step="0.01" min="0" value={form.price} onChange={updateField} required />
           </div>
           <div className="field">
@@ -159,7 +183,7 @@ export default function TradeForm({ onSubmit }) {
           </div>
         </div>
         <div className="field">
-          <label htmlFor="fee">手續費</label>
+          <label htmlFor="fee">手續費（{form.currency}）</label>
           <input id="fee" name="fee" type="number" step="0.01" min="0" value={form.fee} onChange={updateField} />
         </div>
         <div className="actions">
