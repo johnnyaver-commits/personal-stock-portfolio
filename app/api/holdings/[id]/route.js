@@ -20,7 +20,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(_request, { params }) {
   const { id } = await params;
-  const deleted = deleteHolding(id);
+  const deleted = await deleteHolding(id);
   if (!deleted) return NextResponse.json({ message: "Holding not found" }, { status: 404 });
   return NextResponse.json({ deleted: true });
 }

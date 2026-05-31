@@ -4,7 +4,7 @@ import { createTransaction, listTransactions } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ transactions: listTransactions() });
+  return NextResponse.json({ transactions: await listTransactions() });
 }
 
 export async function POST(request) {
