@@ -16,10 +16,25 @@ const initialForm = {
   fee: "20"
 };
 
+function hasChinese(value) {
+  return /[\u4e00-\u9fff]/.test(String(value ?? ""));
+}
+
+function normalizeSymbolInput(value) {
+  const nextValue = String(value ?? "").trimStart();
+  return hasChinese(nextValue) ? nextValue : nextValue.toUpperCase();
+}
+
 function defaultCurrency(symbol, market) {
   const normalizedSymbol = String(symbol ?? "").toUpperCase();
   if (market === "台股" || normalizedSymbol.endsWith(".TW") || normalizedSymbol.endsWith(".TWO")) return "TWD";
   return "USD";
+}
+
+function inferMarket(symbol) {
+  const normalizedSymbol = String(symbol ?? "").toUpperCase();
+  if (normalizedSymbol.endsWith(".TW") || normalizedSymbol.endsWith(".TWO")) return "台股";
+  return "";
 }
 
 export default function TradeForm({ onSubmit }) {
@@ -32,20 +47,20 @@ export default function TradeForm({ onSubmit }) {
 
   function updateField(event) {
     const { name, value } = event.target;
-    const nextValue = name === "symbol" ? value.toUpperCase() : value;
+    const nextValue = name === "symbol" ? normalizeSymbolInput(value) : value;
 
     setForm((current) => {
-      const inferredMarket = nextValue.endsWith(".TW") || nextValue.endsWith(".TWO") ? "台股" : "";
+      if (name !== "symbol") {
+        return { ...current, [name]: nextValue };
+      }
+
+      const market = inferMarket(nextValue);
       return {
         ...current,
-        [name]: nextValue,
-        ...(name === "symbol"
-          ? {
-              symbol_name: "",
-              market: inferredMarket,
-              currency: defaultCurrency(nextValue, inferredMarket)
-            }
-          : {})
+        symbol: nextValue,
+        symbol_name: "",
+        market,
+        currency: defaultCurrency(nextValue, market)
       };
     });
 
@@ -98,17 +113,24 @@ export default function TradeForm({ onSubmit }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (hasChinese(form.symbol) && !form.symbol_name) {
+      setStatus("請先從搜尋建議選擇股票");
+      return;
+    }
+
     setStatus("儲存中...");
     try {
       await onSubmit({
         ...form,
-        name: form.symbol_name,
+        symbol: form.symbol.trim().toUpperCase(),
+        name: form.symbol_name || form.symbol.trim().toUpperCase(),
+        market: form.market || inferMarket(form.symbol),
         currency: form.currency || defaultCurrency(form.symbol, form.market),
         price: Number(form.price),
         quantity: Number(form.quantity),
         fee: Number(form.fee)
       });
-      setStatus("交易已新增");
+      setStatus("已新增交易");
     } catch (error) {
       setStatus(error.message);
     }
@@ -119,7 +141,7 @@ export default function TradeForm({ onSubmit }) {
       <div className="panel-header">
         <div>
           <h2>新增交易</h2>
-          <p>輸入股票代號或名稱，可選擇美股與台股候選</p>
+          <p>輸入代號或中文名稱搜尋台股與美股，系統會帶入市場與幣別。</p>
         </div>
       </div>
       <form className="form" onSubmit={submit}>
@@ -137,7 +159,7 @@ export default function TradeForm({ onSubmit }) {
           </div>
         </div>
         <div className="field symbol-field">
-          <label htmlFor="symbol">股票代號</label>
+          <label htmlFor="symbol">股票代號或名稱</label>
           <div className="search-input">
             <Search size={16} aria-hidden="true" />
             <input
@@ -153,7 +175,7 @@ export default function TradeForm({ onSubmit }) {
             />
           </div>
           {showSuggestions && (searching || suggestions.length > 0) ? (
-            <div className="symbol-menu" role="listbox" aria-label="股票代號搜尋結果">
+            <div className="symbol-menu" role="listbox" aria-label="股票搜尋建議">
               {searching ? <div className="symbol-menu-empty">搜尋中...</div> : null}
               {!searching
                 ? suggestions.map((suggestion) => (
@@ -162,23 +184,25 @@ export default function TradeForm({ onSubmit }) {
                         <strong>{suggestion.symbol}</strong>
                         <small>{suggestion.name}</small>
                       </span>
-                      <em>{suggestion.market} - {suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)}</em>
+                      <em>
+                        {suggestion.market} - {suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)}
+                      </em>
                     </button>
                   ))
                 : null}
             </div>
           ) : null}
           <span className="status">
-            {form.symbol_name ? `已選擇：${form.symbol_name} - ${form.currency}` : `幣別：${form.currency}`}
+            {form.symbol_name ? `已選擇：${form.symbol_name} - ${form.currency}` : `目前幣別：${form.currency}`}
           </span>
         </div>
         <div className="form-row">
           <div className="field">
-            <label htmlFor="price">價格（{form.currency}）</label>
+            <label htmlFor="price">成交價（{form.currency}）</label>
             <input id="price" name="price" type="number" step="0.01" min="0" value={form.price} onChange={updateField} required />
           </div>
           <div className="field">
-            <label htmlFor="quantity">數量</label>
+            <label htmlFor="quantity">股數</label>
             <input id="quantity" name="quantity" type="number" step="0.0001" min="0" value={form.quantity} onChange={updateField} required />
           </div>
         </div>
