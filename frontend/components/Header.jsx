@@ -1,4 +1,4 @@
-import { Activity, RefreshCw } from "lucide-react";
+import { Activity, BarChart3, Home, ListPlus, RefreshCw, WalletCards } from "lucide-react";
 
 export default function Header({ lastUpdated, onRefresh, refreshing }) {
   return (
@@ -21,6 +21,24 @@ export default function Header({ lastUpdated, onRefresh, refreshing }) {
           </button>
         </div>
       </div>
+      <nav className="mobile-nav" aria-label="手機導覽">
+        <a href="#overview">
+          <Home size={18} aria-hidden="true" />
+          總覽
+        </a>
+        <a href="#holdings">
+          <WalletCards size={18} aria-hidden="true" />
+          持股
+        </a>
+        <a href="#allocation">
+          <BarChart3 size={18} aria-hidden="true" />
+          配置
+        </a>
+        <a href="#trade">
+          <ListPlus size={18} aria-hidden="true" />
+          交易
+        </a>
+      </nav>
     </header>
   );
 }

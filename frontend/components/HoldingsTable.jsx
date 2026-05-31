@@ -12,13 +12,13 @@ function number(value) {
 
 export default function HoldingsTable({ holdings }) {
   return (
-    <section className="panel">
+    <section className="panel" id="holdings">
       <div className="panel-header">
         <div>
           <h2>持股清單</h2>
           <p>以最新報價計算市值與未實現損益</p>
         </div>
-        <span className="status">{holdings.length} 檔股票</span>
+        <span className="status pill">{holdings.length} 檔股票</span>
       </div>
       <div className="table-wrap">
         <table>
@@ -39,20 +39,20 @@ export default function HoldingsTable({ holdings }) {
               const trendClass = holding.unrealized_pnl >= 0 ? "gain" : "loss";
               return (
                 <tr key={holding.id}>
-                  <td>
+                  <td data-label="代號">
                     <div className="symbol">{holding.symbol}</div>
                     <div className="subtle">{holding.currency}</div>
                   </td>
-                  <td>{holding.name}</td>
-                  <td>{number(holding.quantity)}</td>
-                  <td>{money(holding.avg_cost, holding.currency)}</td>
-                  <td>{money(holding.current_price, holding.currency)}</td>
-                  <td>{money(holding.market_value, holding.currency)}</td>
-                  <td className={trendClass}>
+                  <td data-label="名稱">{holding.name}</td>
+                  <td data-label="數量">{number(holding.quantity)}</td>
+                  <td data-label="平均成本">{money(holding.avg_cost, holding.currency)}</td>
+                  <td data-label="現價">{money(holding.current_price, holding.currency)}</td>
+                  <td data-label="市值">{money(holding.market_value, holding.currency)}</td>
+                  <td data-label="未實現損益" className={trendClass}>
                     {money(holding.unrealized_pnl, holding.currency)}
                     <div className="subtle">{number(holding.unrealized_pnl_percent)}%</div>
                   </td>
-                  <td>
+                  <td data-label="報價時間">
                     <span className="subtle">{new Date(holding.quote_time).toLocaleTimeString("zh-TW")}</span>
                   </td>
                 </tr>

@@ -58,8 +58,8 @@ export default function PortfolioDashboard() {
     <div className="app-shell">
       <Header lastUpdated={lastUpdated} onRefresh={refresh} refreshing={loading} />
       <main className="main">
-        <section className="summary-grid">
-          <div className="metric">
+        <section className="summary-grid" id="overview">
+          <div className="metric primary">
             <span>總市值</span>
             <strong>{formatMoney(summary.totalValue)}</strong>
           </div>
@@ -79,9 +79,8 @@ export default function PortfolioDashboard() {
         {error ? <p className="status error">{error}</p> : null}
         <section className="content-grid">
           <HoldingsTable holdings={holdings} />
-          <div>
+          <div className="side-stack">
             <PriceChart holdings={holdings} />
-            <div style={{ height: 18 }} />
             <TradeForm onSubmit={handleTradeSubmit} />
           </div>
         </section>

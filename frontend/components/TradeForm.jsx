@@ -40,7 +40,7 @@ export default function TradeForm({ onSubmit }) {
   }
 
   return (
-    <section className="panel">
+    <section className="panel" id="trade">
       <div className="panel-header">
         <div>
           <h2>新增交易</h2>

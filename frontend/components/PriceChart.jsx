@@ -10,7 +10,7 @@ export default function PriceChart({ holdings }) {
   const colors = ["#0f766e", "#2563eb", "#9333ea", "#c2410c", "#a16207", "#64748b"];
 
   return (
-    <section className="panel">
+    <section className="panel" id="allocation">
       <div className="panel-header">
         <div>
           <h2>市值配置</h2>
@@ -39,7 +39,7 @@ export default function PriceChart({ holdings }) {
           {holdings.map((holding, index) => (
             <div className="chart-item" key={holding.id}>
               <span>
-                <span style={{ color: colors[index % colors.length] }}>■</span> {holding.symbol}
+                <span className="legend-dot" style={{ backgroundColor: colors[index % colors.length] }} /> {holding.symbol}
               </span>
               <strong>{formatMoney(holding.market_value)}</strong>
             </div>
