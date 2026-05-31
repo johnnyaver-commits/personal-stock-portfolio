@@ -19,6 +19,7 @@ export default function PortfolioDashboard() {
   const [holdings, setHoldings] = useState([]);
   const [lastUpdated, setLastUpdated] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState("");
 
   async function refresh() {
@@ -54,6 +55,23 @@ export default function PortfolioDashboard() {
     await refresh();
   }
 
+  async function handleDeleteHolding(holding) {
+    const confirmed = window.confirm(`確定刪除 ${holding.symbol}？相關交易紀錄也會從目前暫存資料移除。`);
+    if (!confirmed) return;
+
+    setDeletingId(holding.id);
+    setError("");
+    try {
+      await api.deleteHolding(holding.id);
+      setHoldings((current) => current.filter((item) => item.id !== holding.id));
+      setLastUpdated(new Date().toLocaleTimeString("zh-TW"));
+    } catch (deleteError) {
+      setError(deleteError.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="app-shell">
       <Header lastUpdated={lastUpdated} onRefresh={refresh} refreshing={loading} />
@@ -78,7 +96,7 @@ export default function PortfolioDashboard() {
         </section>
         {error ? <p className="status error">{error}</p> : null}
         <section className="content-grid">
-          <HoldingsTable holdings={holdings} />
+          <HoldingsTable holdings={holdings} deletingId={deletingId} onDelete={handleDeleteHolding} />
           <div className="side-stack">
             <PriceChart holdings={holdings} />
             <TradeForm onSubmit={handleTradeSubmit} />

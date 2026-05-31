@@ -1,3 +1,5 @@
+import { Trash2 } from "lucide-react";
+
 function money(value, currency = "USD") {
   return new Intl.NumberFormat("zh-TW", {
     style: "currency",
@@ -10,7 +12,7 @@ function number(value) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 4 }).format(Number(value ?? 0));
 }
 
-export default function HoldingsTable({ holdings }) {
+export default function HoldingsTable({ holdings, deletingId, onDelete }) {
   return (
     <section className="panel" id="holdings">
       <div className="panel-header">
@@ -32,11 +34,14 @@ export default function HoldingsTable({ holdings }) {
               <th>市值</th>
               <th>未實現損益</th>
               <th>報價時間</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
             {holdings.map((holding) => {
               const trendClass = holding.unrealized_pnl >= 0 ? "gain" : "loss";
+              const isDeleting = deletingId === holding.id;
+
               return (
                 <tr key={holding.id}>
                   <td data-label="代號">
@@ -54,6 +59,12 @@ export default function HoldingsTable({ holdings }) {
                   </td>
                   <td data-label="報價時間">
                     <span className="subtle">{new Date(holding.quote_time).toLocaleTimeString("zh-TW")}</span>
+                  </td>
+                  <td data-label="操作">
+                    <button className="icon-button danger" type="button" onClick={() => onDelete(holding)} disabled={isDeleting} title={`刪除 ${holding.symbol}`}>
+                      <Trash2 size={16} aria-hidden="true" />
+                      <span>{isDeleting ? "刪除中" : "刪除"}</span>
+                    </button>
                   </td>
                 </tr>
               );

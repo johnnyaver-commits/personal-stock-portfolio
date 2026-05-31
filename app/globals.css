@@ -224,7 +224,7 @@ button:disabled {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 820px;
+  min-width: 930px;
 }
 
 th,
@@ -324,6 +324,34 @@ td {
 
 .button:active {
   transform: translateY(1px);
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.icon-button:hover {
+  background: #f8fafc;
+}
+
+.icon-button.danger {
+  border-color: rgba(194, 65, 12, 0.28);
+  color: var(--loss);
+}
+
+.icon-button.danger:hover {
+  background: #fff4ed;
 }
 
 .actions {
@@ -575,7 +603,8 @@ td {
   }
 
   td:first-child,
-  td:nth-child(7) {
+  td:nth-child(7),
+  td:nth-child(9) {
     grid-column: 1 / -1;
   }
 
@@ -604,6 +633,11 @@ td {
 
   .button {
     width: 100%;
+  }
+
+  .icon-button {
+    width: 100%;
+    min-height: 40px;
   }
 
   .actions .status {
