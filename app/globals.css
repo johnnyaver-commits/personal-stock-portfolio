@@ -477,6 +477,28 @@ td {
   background: #fff4ed;
 }
 
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.edit-input {
+  width: 8.5rem;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text);
+  text-align: right;
+}
+
+.edit-input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(15, 118, 110, 0.14);
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -761,6 +783,17 @@ td {
   .icon-button {
     width: 100%;
     min-height: 40px;
+  }
+
+  .row-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .edit-input {
+    width: 100%;
+    text-align: left;
   }
 
   .actions .status {

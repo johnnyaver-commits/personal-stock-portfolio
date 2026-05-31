@@ -37,6 +37,7 @@ export default function PortfolioDashboard() {
   const [lastUpdated, setLastUpdated] = useState("");
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [savingId, setSavingId] = useState(null);
   const [error, setError] = useState("");
 
   async function refresh() {
@@ -90,6 +91,25 @@ export default function PortfolioDashboard() {
     await refresh();
   }
 
+  async function handleUpdateHolding(holding, updates) {
+    if (updates.quantity < 0 || updates.avg_cost < 0 || Number.isNaN(updates.quantity) || Number.isNaN(updates.avg_cost)) {
+      setError("數量和平均成本必須是 0 以上的數字");
+      return;
+    }
+
+    setSavingId(holding.id);
+    setError("");
+    try {
+      await api.updateHolding(holding.id, updates);
+      await refresh();
+    } catch (updateError) {
+      setError(updateError.message);
+      throw updateError;
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   async function handleDeleteHolding(holding) {
     const confirmed = window.confirm(`確定刪除 ${holding.owner_name} 的 ${holding.symbol}？這會從 Neon 資料庫移除這筆持股。`);
     if (!confirmed) return;
@@ -136,7 +156,14 @@ export default function PortfolioDashboard() {
         </section>
         {error ? <p className="status error">{error}</p> : null}
         <section className="content-grid">
-          <HoldingsTable holdings={filteredHoldings} deletingId={deletingId} showOwner={selectedOwnerId === "all"} onDelete={handleDeleteHolding} />
+          <HoldingsTable
+            deletingId={deletingId}
+            holdings={filteredHoldings}
+            onDelete={handleDeleteHolding}
+            onUpdate={handleUpdateHolding}
+            savingId={savingId}
+            showOwner={selectedOwnerId === "all"}
+          />
           <div className="side-stack">
             <PriceChart holdings={filteredHoldings} showOwner={selectedOwnerId === "all"} />
             <TradeForm owners={owners} selectedOwnerId={selectedOwnerId} onSubmit={handleTradeSubmit} />
