@@ -1,0 +1,50 @@
+{
+  "holdings": [
+    {
+      "symbol": "2330.TW",
+      "name": "台積電",
+      "quantity": 100,
+      "avg_cost": 500,
+      "current_price": 600,
+      "currency": "TWD"
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "quantity": 50,
+      "avg_cost": 150,
+      "current_price": 182,
+      "currency": "USD"
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon.com Inc.",
+      "quantity": 20,
+      "avg_cost": 120.5,
+      "current_price": 138.2,
+      "currency": "USD"
+    }
+  ],
+  "transactions": [
+    {
+      "holding_id": 1,
+      "symbol": "2330.TW",
+      "type": "buy",
+      "trade_date": "2026-05-01",
+      "price": 500,
+      "quantity": 100,
+      "fee": 20,
+      "realized_pnl": 0
+    },
+    {
+      "holding_id": 2,
+      "symbol": "AAPL",
+      "type": "buy",
+      "trade_date": "2026-05-05",
+      "price": 150,
+      "quantity": 50,
+      "fee": 1,
+      "realized_pnl": 0
+    }
+  ]
+}
