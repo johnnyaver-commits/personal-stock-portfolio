@@ -162,14 +162,14 @@ export default function TradeForm({ onSubmit }) {
                         <strong>{suggestion.symbol}</strong>
                         <small>{suggestion.name}</small>
                       </span>
-                      <em>{suggestion.market} · {suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)}</em>
+                      <em>{suggestion.market} - {suggestion.currency || defaultCurrency(suggestion.symbol, suggestion.market)}</em>
                     </button>
                   ))
                 : null}
             </div>
           ) : null}
           <span className="status">
-            {form.symbol_name ? `已選擇：${form.symbol_name} · ${form.currency}` : `幣別：${form.currency}`}
+            {form.symbol_name ? `已選擇：${form.symbol_name} - ${form.currency}` : `幣別：${form.currency}`}
           </span>
         </div>
         <div className="form-row">
