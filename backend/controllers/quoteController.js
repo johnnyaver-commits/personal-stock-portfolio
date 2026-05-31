@@ -1,15 +1,39 @@
-function createQuote(symbol) {
-  const base = symbol.endsWith(".TW") ? 600 : 150;
-  const factor = 1 + Math.sin(Date.now() / 45000 + symbol.length) * 0.02;
+function fallbackQuote(symbol) {
   return {
-    price: Math.round(base * factor * 100) / 100,
+    price: symbol.endsWith(".TW") ? 600 : 150,
     currency: symbol.endsWith(".TW") ? "TWD" : "USD",
     timestamp: new Date().toISOString(),
-    source: "demo-realtime"
+    source: "fallback-demo"
   };
 }
 
-function getQuotes(req, res) {
+async function createQuote(symbol) {
+  try {
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`, {
+      headers: {
+        accept: "application/json",
+        "user-agent": "Mozilla/5.0 portfolio-dashboard"
+      }
+    });
+    if (!response.ok) return fallbackQuote(symbol);
+    const data = await response.json();
+    const result = data?.chart?.result?.[0];
+    const meta = result?.meta;
+    const price = meta?.regularMarketPrice;
+    if (!Number.isFinite(price)) return fallbackQuote(symbol);
+    return {
+      price: Math.round(price * 100) / 100,
+      currency: meta?.currency || (symbol.endsWith(".TW") ? "TWD" : "USD"),
+      timestamp: meta?.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : new Date().toISOString(),
+      source: "yahoo-finance-chart",
+      delayed: true
+    };
+  } catch {
+    return fallbackQuote(symbol);
+  }
+}
+
+async function getQuotes(req, res) {
   const symbols = String(req.query.symbol || "")
     .split(",")
     .map((symbol) => symbol.trim().toUpperCase())
@@ -20,7 +44,7 @@ function getQuotes(req, res) {
   }
 
   return res.json({
-    quotes: Object.fromEntries(symbols.map((symbol) => [symbol, createQuote(symbol)]))
+    quotes: Object.fromEntries(await Promise.all(symbols.map(async (symbol) => [symbol, await createQuote(symbol)])))
   });
 }
 

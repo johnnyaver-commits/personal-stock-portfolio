@@ -117,8 +117,8 @@ SQL migration 位於 `db/migrations/001_create_tables.sql`。
 ```json
 {
   "quotes": {
-    "2330.TW": { "price": 610, "currency": "TWD", "source": "demo-realtime" },
-    "AMZN": { "price": 120.5, "currency": "USD", "source": "demo-realtime" }
+    "2330.TW": { "price": 610, "currency": "TWD", "source": "yahoo-finance-chart" },
+    "AMZN": { "price": 120.5, "currency": "USD", "source": "yahoo-finance-chart" }
   }
 }
 ```
@@ -170,8 +170,8 @@ UI 草圖：
 
 外部行情整合：
 
-- 目前為 demo provider。
-- 正式版可在 quote route 中依 `FUGLE_API_KEY`、`FUBON_API_KEY` 或其他 provider 環境變數切換。
+- 目前使用 Yahoo Finance chart API，免 API key。
+- Yahoo Finance 為非官方免費資料源，可能延遲、限流或格式變動；正式商用可再切換 Fugle、Fubon、Finnhub、Polygon 等授權 provider。
 
 ## 8. 計算邏輯
 

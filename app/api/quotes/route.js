@@ -14,5 +14,5 @@ export async function GET(request) {
     return NextResponse.json({ message: "symbol query parameter is required" }, { status: 400 });
   }
 
-  return NextResponse.json({ quotes: listQuotes(symbols) });
+  return NextResponse.json({ quotes: await listQuotes(symbols) });
 }

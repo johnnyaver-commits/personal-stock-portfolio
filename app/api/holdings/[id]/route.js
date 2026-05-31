@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(_request, { params }) {
   const { id } = await params;
-  const holding = getHolding(id);
+  const holding = await getHolding(id);
   if (!holding) return NextResponse.json({ message: "Holding not found" }, { status: 404 });
   return NextResponse.json({ holding });
 }
@@ -13,7 +13,7 @@ export async function GET(_request, { params }) {
 export async function PUT(request, { params }) {
   const { id } = await params;
   const body = await request.json();
-  const holding = updateHolding(id, body);
+  const holding = await updateHolding(id, body);
   if (!holding) return NextResponse.json({ message: "Holding not found" }, { status: 404 });
   return NextResponse.json({ holding });
 }
