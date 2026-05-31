@@ -216,6 +216,104 @@ button:disabled {
   align-items: start;
 }
 
+.trend-panel {
+  margin-bottom: 24px;
+}
+
+.trend-header {
+  align-items: flex-start;
+}
+
+.segmented {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.segmented button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.segmented button.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.trend-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 18px;
+  padding: 18px 24px 24px;
+}
+
+.trend-chart-wrap {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.trend-chart {
+  display: block;
+  width: 100%;
+  height: 260px;
+}
+
+.trend-empty {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.trend-legend {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.trend-stat {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.trend-stat span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.trend-stat i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+
+.trend-stat strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
 .side-stack {
   display: grid;
   gap: 24px;
@@ -753,6 +851,37 @@ td {
   .panel-header {
     align-items: flex-start;
     padding: 14px;
+  }
+
+  .trend-header {
+    display: grid;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .segmented button {
+    flex: 1;
+  }
+
+  .trend-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .trend-chart-wrap {
+    border-radius: 20px;
+    padding: 8px;
+  }
+
+  .trend-chart {
+    height: 220px;
+  }
+
+  .trend-legend {
+    grid-template-columns: 1fr;
   }
 
   .panel-header h2 {

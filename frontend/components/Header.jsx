@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Home, ListPlus, RefreshCw, WalletCards } from "lucide-react";
+import { Activity, Home, ListPlus, RefreshCw, TrendingUp, WalletCards } from "lucide-react";
 
 export default function Header({ lastUpdated, onRefresh, refreshing }) {
   return (
@@ -30,9 +30,9 @@ export default function Header({ lastUpdated, onRefresh, refreshing }) {
           <WalletCards size={18} aria-hidden="true" />
           持股
         </a>
-        <a href="#allocation">
-          <BarChart3 size={18} aria-hidden="true" />
-          分布
+        <a href="#trends">
+          <TrendingUp size={18} aria-hidden="true" />
+          趨勢
         </a>
         <a href="#trade">
           <ListPlus size={18} aria-hidden="true" />

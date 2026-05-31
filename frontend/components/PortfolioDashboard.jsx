@@ -5,6 +5,7 @@ import Header from "@/frontend/components/Header";
 import HoldingsTable from "@/frontend/components/HoldingsTable";
 import PriceChart from "@/frontend/components/PriceChart";
 import TradeForm from "@/frontend/components/TradeForm";
+import TrendChart from "@/frontend/components/TrendChart";
 import { api } from "@/frontend/utils/api";
 
 function formatMoney(value, currency) {
@@ -33,6 +34,7 @@ function OwnerFilter({ owners, selectedOwnerId, onChange }) {
 export default function PortfolioDashboard() {
   const [owners, setOwners] = useState([]);
   const [holdings, setHoldings] = useState([]);
+  const [trends, setTrends] = useState({ daily: [], monthly: [], yearly: [] });
   const [selectedOwnerId, setSelectedOwnerId] = useState("all");
   const [lastUpdated, setLastUpdated] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,13 +42,14 @@ export default function PortfolioDashboard() {
   const [savingId, setSavingId] = useState(null);
   const [error, setError] = useState("");
 
-  async function refresh() {
+  async function refresh(ownerId = selectedOwnerId) {
     setLoading(true);
     setError("");
     try {
-      const [ownersData, holdingsData] = await Promise.all([api.getOwners(), api.getHoldings()]);
+      const [ownersData, holdingsData, trendsData] = await Promise.all([api.getOwners(), api.getHoldings(), api.getTrends(ownerId)]);
       setOwners(ownersData.owners);
       setHoldings(holdingsData.holdings);
+      setTrends(trendsData.trends);
       setLastUpdated(new Date().toLocaleTimeString("zh-TW"));
     } catch (requestError) {
       setError(requestError.message);
@@ -56,10 +59,10 @@ export default function PortfolioDashboard() {
   }
 
   useEffect(() => {
-    refresh();
-    const timer = setInterval(refresh, 15000);
+    refresh(selectedOwnerId);
+    const timer = setInterval(() => refresh(selectedOwnerId), 15000);
     return () => clearInterval(timer);
-  }, []);
+  }, [selectedOwnerId]);
 
   const selectedOwner = owners.find((owner) => String(owner.id) === String(selectedOwnerId));
   const filteredHoldings = useMemo(() => {
@@ -130,7 +133,7 @@ export default function PortfolioDashboard() {
 
   return (
     <div className="app-shell">
-      <Header lastUpdated={lastUpdated} onRefresh={refresh} refreshing={loading} />
+      <Header lastUpdated={lastUpdated} onRefresh={() => refresh()} refreshing={loading} />
       <main className="main">
         <OwnerFilter owners={owners} selectedOwnerId={selectedOwnerId} onChange={setSelectedOwnerId} />
         <section className="summary-grid" id="overview">
@@ -155,6 +158,7 @@ export default function PortfolioDashboard() {
           </div>
         </section>
         {error ? <p className="status error">{error}</p> : null}
+        <TrendChart trends={trends} />
         <section className="content-grid">
           <HoldingsTable
             deletingId={deletingId}
