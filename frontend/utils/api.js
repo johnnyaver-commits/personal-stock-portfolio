@@ -37,5 +37,6 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data)
     }),
-  getQuote: (symbols) => request(`/api/quotes?symbol=${encodeURIComponent([].concat(symbols).join(","))}`)
+  getQuote: (symbols) => request(`/api/quotes?symbol=${encodeURIComponent([].concat(symbols).join(","))}`),
+  searchSymbols: (query) => request(`/api/symbol-search?q=${encodeURIComponent(query)}`)
 };

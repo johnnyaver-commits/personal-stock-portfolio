@@ -297,6 +297,99 @@ td {
   outline: 3px solid rgba(15, 118, 110, 0.14);
 }
 
+.symbol-field {
+  position: relative;
+}
+
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input svg {
+  position: absolute;
+  left: 10px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-input input {
+  padding-left: 34px;
+}
+
+.symbol-menu {
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 25;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
+}
+
+.symbol-menu-empty {
+  padding: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.symbol-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 11px 12px;
+  background: #fff;
+  color: var(--text);
+  text-align: left;
+}
+
+.symbol-option:last-child {
+  border-bottom: 0;
+}
+
+.symbol-option:hover,
+.symbol-option:focus {
+  background: #f8fafc;
+  outline: none;
+}
+
+.symbol-option span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.symbol-option strong {
+  font-size: 14px;
+}
+
+.symbol-option small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.symbol-option em {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

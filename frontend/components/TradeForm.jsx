@@ -1,11 +1,13 @@
 "use client";
 
-import { PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { PlusCircle, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "@/frontend/utils/api";
 
 const initialForm = {
   trade_date: new Date().toISOString().slice(0, 10),
   symbol: "2330.TW",
+  symbol_name: "台積電",
   type: "buy",
   price: "600",
   quantity: "100",
@@ -15,12 +17,62 @@ const initialForm = {
 export default function TradeForm({ onSubmit }) {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const ignoreNextSearch = useRef(false);
 
   function updateField(event) {
+    const { name, value } = event.target;
     setForm((current) => ({
       ...current,
-      [event.target.name]: event.target.value
+      [name]: name === "symbol" ? value.toUpperCase() : value,
+      ...(name === "symbol" ? { symbol_name: "" } : {})
     }));
+
+    if (name === "symbol") {
+      setShowSuggestions(true);
+    }
+  }
+
+  useEffect(() => {
+    const query = form.symbol.trim();
+
+    if (ignoreNextSearch.current) {
+      ignoreNextSearch.current = false;
+      return;
+    }
+
+    if (query.length < 2) {
+      setSuggestions([]);
+      setSearching(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const data = await api.searchSymbols(query);
+        setSuggestions(data.results ?? []);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 260);
+
+    return () => clearTimeout(timer);
+  }, [form.symbol]);
+
+  function selectSymbol(suggestion) {
+    ignoreNextSearch.current = true;
+    setForm((current) => ({
+      ...current,
+      symbol: suggestion.symbol,
+      symbol_name: suggestion.name
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
   }
 
   async function submit(event) {
@@ -29,6 +81,7 @@ export default function TradeForm({ onSubmit }) {
     try {
       await onSubmit({
         ...form,
+        name: form.symbol_name,
         price: Number(form.price),
         quantity: Number(form.quantity),
         fee: Number(form.fee)
@@ -44,7 +97,7 @@ export default function TradeForm({ onSubmit }) {
       <div className="panel-header">
         <div>
           <h2>新增交易</h2>
-          <p>買進會更新平均成本，賣出會估算已實現損益</p>
+          <p>輸入股票代號或名稱，可選擇美股與台股候選</p>
         </div>
       </div>
       <form className="form" onSubmit={submit}>
@@ -61,9 +114,39 @@ export default function TradeForm({ onSubmit }) {
             </select>
           </div>
         </div>
-        <div className="field">
+        <div className="field symbol-field">
           <label htmlFor="symbol">股票代號</label>
-          <input id="symbol" name="symbol" value={form.symbol} onChange={updateField} required />
+          <div className="search-input">
+            <Search size={16} aria-hidden="true" />
+            <input
+              autoComplete="off"
+              id="symbol"
+              name="symbol"
+              value={form.symbol}
+              onBlur={() => window.setTimeout(() => setShowSuggestions(false), 120)}
+              onChange={updateField}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder="輸入 AAPL、TSM、2330 或 台積電"
+              required
+            />
+          </div>
+          {showSuggestions && (searching || suggestions.length > 0) ? (
+            <div className="symbol-menu" role="listbox" aria-label="股票代號搜尋結果">
+              {searching ? <div className="symbol-menu-empty">搜尋中...</div> : null}
+              {!searching
+                ? suggestions.map((suggestion) => (
+                    <button className="symbol-option" key={`${suggestion.market}-${suggestion.symbol}`} type="button" onMouseDown={() => selectSymbol(suggestion)}>
+                      <span>
+                        <strong>{suggestion.symbol}</strong>
+                        <small>{suggestion.name}</small>
+                      </span>
+                      <em>{suggestion.market}</em>
+                    </button>
+                  ))
+                : null}
+            </div>
+          ) : null}
+          {form.symbol_name ? <span className="status">已選擇：{form.symbol_name}</span> : null}
         </div>
         <div className="form-row">
           <div className="field">
