@@ -12,20 +12,21 @@ function number(value) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 4 }).format(Number(value ?? 0));
 }
 
-export default function HoldingsTable({ holdings, deletingId, onDelete }) {
+export default function HoldingsTable({ holdings, deletingId, showOwner = false, onDelete }) {
   return (
     <section className="panel" id="holdings">
       <div className="panel-header">
         <div>
-          <h2>持股清單</h2>
-          <p>以最新報價計算市值與未實現損益</p>
+          <h2>持股庫存</h2>
+          <p>{showOwner ? "整合顯示所有持有人的股票，並保留個別歸屬。" : "顯示目前持有人的股票庫存與損益。"}</p>
         </div>
-        <span className="status pill">{holdings.length} 檔股票</span>
+        <span className="status pill">{holdings.length} 筆持股</span>
       </div>
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
+              {showOwner ? <th>持有人</th> : null}
               <th>代號</th>
               <th>名稱</th>
               <th>數量（股）</th>
@@ -33,7 +34,7 @@ export default function HoldingsTable({ holdings, deletingId, onDelete }) {
               <th>現價</th>
               <th>市值</th>
               <th>未實現損益</th>
-              <th>報價時間</th>
+              <th>更新時間</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -44,6 +45,7 @@ export default function HoldingsTable({ holdings, deletingId, onDelete }) {
 
               return (
                 <tr key={holding.id}>
+                  {showOwner ? <td data-label="持有人">{holding.owner_name}</td> : null}
                   <td data-label="代號">
                     <div className="symbol">{holding.symbol}</div>
                     <div className="subtle">{holding.currency}</div>
@@ -57,7 +59,7 @@ export default function HoldingsTable({ holdings, deletingId, onDelete }) {
                     {money(holding.unrealized_pnl, holding.currency)}
                     <div className="subtle">{number(holding.unrealized_pnl_percent)}%</div>
                   </td>
-                  <td data-label="報價時間">
+                  <td data-label="更新時間">
                     <span className="subtle">{new Date(holding.quote_time).toLocaleTimeString("zh-TW")}</span>
                   </td>
                   <td data-label="操作">

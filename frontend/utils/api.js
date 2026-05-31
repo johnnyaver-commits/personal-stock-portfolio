@@ -16,6 +16,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  getOwners: () => request("/api/owners"),
   getHoldings: () => request("/api/holdings"),
   createHolding: (data) =>
     request("/api/holdings", {

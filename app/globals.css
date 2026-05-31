@@ -135,6 +135,31 @@ button:disabled {
   scroll-margin-top: 96px;
 }
 
+.owner-filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.owner-filter button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 14px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.owner-filter button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 .metric {
   position: relative;
   overflow: hidden;
@@ -165,6 +190,11 @@ button:disabled {
   display: block;
   font-size: 24px;
   line-height: 1.2;
+}
+
+.metric-line {
+  display: block;
+  margin-top: 4px;
 }
 
 .metric .gain,
@@ -224,7 +254,7 @@ button:disabled {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 930px;
+  min-width: 1030px;
 }
 
 th,
@@ -695,20 +725,20 @@ td {
     text-align: left;
   }
 
-  td:first-child,
-  td:nth-child(7),
-  td:nth-child(9) {
+  td[data-label="代號"],
+  td[data-label="未實現損益"],
+  td[data-label="操作"] {
     grid-column: 1 / -1;
   }
 
-  td:first-child {
+  td[data-label="代號"] {
     grid-template-columns: 1fr auto;
     align-items: end;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--line);
   }
 
-  td:first-child::before {
+  td[data-label="代號"]::before {
     grid-column: 1 / -1;
   }
 
