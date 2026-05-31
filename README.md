@@ -1,26 +1,25 @@
-# 個人股票庫存即時網站
+# Personal Stock Portfolio
 
-Next.js 個人投資組合儀表板，支援持股清單、交易新增、即時報價輪詢、市值配置與損益計算。
+Next.js portfolio dashboard for family stock holdings. It supports multiple owners, Yahoo Finance quotes, Neon Postgres persistence, mobile-friendly views, editable holdings, and daily portfolio trend snapshots.
 
-## 快速開始
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-開啟 `http://localhost:3000`。
+Open `http://localhost:3000`.
 
-## 主要功能
+## Login Protection
 
-- 持股清單：股票代號、名稱、數量、成本、現價、市值、未實現損益。
-- 新增交易：買進更新平均成本，賣出估算已實現損益。
-- 即時報價：目前使用 Yahoo Finance chart API，每 15 秒刷新。
-- API：`/api/holdings`、`/api/transactions`、`/api/quotes`。
-- 部署：可由 GitHub 連動 Vercel 自動部署。
+The app is protected with HTTP Basic Auth. Set these environment variables in Vercel:
 
-## 正式環境建議
+- `PORTFOLIO_AUTH_USERNAME`
+- `PORTFOLIO_AUTH_PASSWORD`
 
-目前 demo 版使用記憶體 store，適合展示與開發驗證。正式上線請接 PostgreSQL，並套用 `db/migrations/001_create_tables.sql`。
+If either value is missing, the site rejects requests instead of exposing portfolio data.
 
-行情 provider 目前使用免 key 的 Yahoo Finance chart API。它不是官方授權 API，可能延遲、限流或格式變動；正式商用可替換為 Fugle、Fubon、Finnhub 或 IEX Cloud，API key 應放在 Vercel Environment Variables，不要 commit 到 repo。
+## Deployment
+
+Deploy with Vercel. Configure Neon Postgres environment variables and the login variables above in the Vercel project settings.
