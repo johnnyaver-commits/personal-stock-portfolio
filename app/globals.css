@@ -530,35 +530,95 @@ td {
   padding: 18px;
 }
 
-.chart svg {
+.allocation-chart {
   display: block;
   width: 100%;
-  height: 220px;
+  height: 160px;
 }
 
 .chart-list {
   display: grid;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .chart-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 12px;
   border-radius: 6px;
   background: var(--panel-soft);
   font-size: 13px;
 }
 
-.chart-item span {
+.chart-item-main {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+.chart-item-text {
+  display: grid;
+  min-width: 0;
+}
+
+.chart-item-text strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-item-text small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-item-value {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.chart-item-value strong {
+  color: var(--text);
+}
+
+.chart-item-value span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-progress {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  height: 7px;
+  border-radius: 999px;
+  background: #d9e2ec;
+}
+
+.chart-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.chart-empty {
+  padding: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
 
 .legend-dot {
+  flex: 0 0 auto;
   width: 9px;
   height: 9px;
   border-radius: 999px;
@@ -805,7 +865,34 @@ td {
     padding: 14px;
   }
 
-  .chart svg {
-    height: 180px;
+  .allocation-chart {
+    display: none;
+  }
+
+  .chart-list {
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .chart-item {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .chart-item-main {
+    align-items: flex-start;
+  }
+
+  .chart-item-text strong,
+  .chart-item-text small {
+    white-space: normal;
+  }
+
+  .chart-item-value {
+    align-items: end;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
   }
 }
