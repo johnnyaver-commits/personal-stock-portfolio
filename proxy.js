@@ -39,7 +39,10 @@ export function proxy(request) {
   }
 
   const credentials = parseBasicAuth(request.headers.get("authorization"));
-  if (credentials?.username === expectedUsername && credentials?.password === expectedPassword) {
+  const username = credentials?.username?.trim().toLowerCase();
+  const password = credentials?.password?.trim();
+
+  if (username === expectedUsername.toLowerCase() && password === expectedPassword) {
     return NextResponse.next();
   }
 
