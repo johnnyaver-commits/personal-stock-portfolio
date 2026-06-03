@@ -38,19 +38,36 @@ export default function PortfolioDashboard() {
   const [selectedOwnerId, setSelectedOwnerId] = useState("all");
   const [lastUpdated, setLastUpdated] = useState("");
   const [loading, setLoading] = useState(false);
+  const [trendLoading, setTrendLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [savingId, setSavingId] = useState(null);
   const [error, setError] = useState("");
+
+  async function loadPrimaryData() {
+    const [ownersData, holdingsData] = await Promise.all([api.getOwners(), api.getHoldings()]);
+    setOwners(ownersData.owners);
+    setHoldings(holdingsData.holdings);
+    setLastUpdated(new Date().toLocaleTimeString("zh-TW"));
+  }
+
+  async function loadTrends(ownerId = selectedOwnerId) {
+    setTrendLoading(true);
+    try {
+      const trendsData = await api.getTrends(ownerId);
+      setTrends(trendsData.trends);
+    } catch {
+      // Trend data is secondary; keep the portfolio usable if snapshot refresh is slow.
+    } finally {
+      setTrendLoading(false);
+    }
+  }
 
   async function refresh(ownerId = selectedOwnerId) {
     setLoading(true);
     setError("");
     try {
-      const [ownersData, holdingsData, trendsData] = await Promise.all([api.getOwners(), api.getHoldings(), api.getTrends(ownerId)]);
-      setOwners(ownersData.owners);
-      setHoldings(holdingsData.holdings);
-      setTrends(trendsData.trends);
-      setLastUpdated(new Date().toLocaleTimeString("zh-TW"));
+      await loadPrimaryData();
+      loadTrends(ownerId);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -60,7 +77,7 @@ export default function PortfolioDashboard() {
 
   useEffect(() => {
     refresh(selectedOwnerId);
-    const timer = setInterval(() => refresh(selectedOwnerId), 15000);
+    const timer = setInterval(() => refresh(selectedOwnerId), 60_000);
     return () => clearInterval(timer);
   }, [selectedOwnerId]);
 
@@ -133,7 +150,7 @@ export default function PortfolioDashboard() {
 
   return (
     <div className="app-shell">
-      <Header lastUpdated={lastUpdated} onRefresh={() => refresh()} refreshing={loading} />
+      <Header lastUpdated={lastUpdated} onRefresh={() => refresh()} refreshing={loading || trendLoading} />
       <main className="main">
         <OwnerFilter owners={owners} selectedOwnerId={selectedOwnerId} onChange={setSelectedOwnerId} />
         <section className="summary-grid" id="overview">
@@ -158,7 +175,7 @@ export default function PortfolioDashboard() {
           </div>
         </section>
         {error ? <p className="status error">{error}</p> : null}
-        <TrendChart trends={trends} />
+        <TrendChart loading={trendLoading} trends={trends} />
         <section className="content-grid">
           <HoldingsTable
             deletingId={deletingId}
