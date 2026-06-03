@@ -55,6 +55,73 @@ button:disabled {
   min-height: 100vh;
 }
 
+.login-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: #ffffff;
+}
+
+.login-card {
+  display: grid;
+  gap: 18px;
+  width: min(100%, 420px);
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  background: var(--panel-soft);
+  padding: 28px;
+}
+
+.login-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.login-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-form input {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.login-form input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(89, 79, 244, 0.14);
+}
+
 .topbar {
   position: sticky;
   top: 0;

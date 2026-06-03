@@ -1,52 +1,41 @@
 import { NextResponse } from "next/server";
 
-function unauthorized() {
-  return new Response("Authentication required", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="Portfolio", charset="UTF-8"',
-      "Cache-Control": "no-store"
-    }
-  });
+const AUTH_COOKIE = "portfolio_session";
+
+function expectedSession() {
+  const username = process.env.PORTFOLIO_AUTH_USERNAME?.trim().toLowerCase();
+  const password = process.env.PORTFOLIO_AUTH_PASSWORD?.trim();
+  if (!username || !password) return null;
+  return btoa(`${username}:${password}`);
 }
 
-function parseBasicAuth(header) {
-  if (!header) return null;
-
-  const [scheme, encoded] = header.split(" ");
-  if (scheme?.toLowerCase() !== "basic" || !encoded) return null;
-
-  try {
-    const decoded = atob(encoded);
-    const separatorIndex = decoded.indexOf(":");
-    if (separatorIndex === -1) return null;
-
-    return {
-      username: decoded.slice(0, separatorIndex),
-      password: decoded.slice(separatorIndex + 1)
-    };
-  } catch {
-    return null;
-  }
+function isPublicPath(pathname) {
+  return (
+    pathname === "/login" ||
+    pathname === "/api/login" ||
+    pathname.startsWith("/_next/") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml"
+  );
 }
 
 export function proxy(request) {
-  const expectedUsername = process.env.PORTFOLIO_AUTH_USERNAME?.trim();
-  const expectedPassword = process.env.PORTFOLIO_AUTH_PASSWORD?.trim();
+  const { pathname } = request.nextUrl;
+  if (isPublicPath(pathname)) return NextResponse.next();
 
-  if (!expectedUsername || !expectedPassword) {
-    return unauthorized();
+  const session = expectedSession();
+  const currentSession = request.cookies.get(AUTH_COOKIE)?.value;
+  if (session && currentSession === session) return NextResponse.next();
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ message: "Authentication required" }, { status: 401 });
   }
 
-  const credentials = parseBasicAuth(request.headers.get("authorization"));
-  const username = credentials?.username?.trim().toLowerCase();
-  const password = credentials?.password?.trim();
-
-  if (username === expectedUsername.toLowerCase() && password === expectedPassword) {
-    return NextResponse.next();
-  }
-
-  return unauthorized();
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/login";
+  loginUrl.searchParams.set("next", pathname);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
