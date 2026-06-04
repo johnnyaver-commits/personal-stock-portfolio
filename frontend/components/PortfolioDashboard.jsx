@@ -6,6 +6,7 @@ import HoldingsTable from "@/frontend/components/HoldingsTable";
 import PriceChart from "@/frontend/components/PriceChart";
 import TradeForm from "@/frontend/components/TradeForm";
 import TrendChart from "@/frontend/components/TrendChart";
+import WeeklyAnalysis from "@/frontend/components/WeeklyAnalysis";
 import { api } from "@/frontend/utils/api";
 
 function formatMoney(value, currency) {
@@ -35,10 +36,12 @@ export default function PortfolioDashboard() {
   const [owners, setOwners] = useState([]);
   const [holdings, setHoldings] = useState([]);
   const [trends, setTrends] = useState({ daily: [], monthly: [], yearly: [] });
+  const [weeklyAnalysis, setWeeklyAnalysis] = useState(null);
   const [selectedOwnerId, setSelectedOwnerId] = useState("all");
   const [lastUpdated, setLastUpdated] = useState("");
   const [loading, setLoading] = useState(false);
   const [trendLoading, setTrendLoading] = useState(false);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [savingId, setSavingId] = useState(null);
   const [error, setError] = useState("");
@@ -62,12 +65,22 @@ export default function PortfolioDashboard() {
     }
   }
 
+  async function loadWeeklyAnalysis() {
+    try {
+      const data = await api.getWeeklyAnalysis();
+      setWeeklyAnalysis(data.analysis);
+    } catch {
+      // Weekly analysis is secondary; keep the portfolio usable if it is unavailable.
+    }
+  }
+
   async function refresh(ownerId = selectedOwnerId) {
     setLoading(true);
     setError("");
     try {
       await loadPrimaryData();
       loadTrends(ownerId);
+      loadWeeklyAnalysis();
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -109,6 +122,19 @@ export default function PortfolioDashboard() {
       owner_id: data.owner_id ?? (selectedOwnerId === "all" ? 1 : selectedOwnerId)
     });
     await refresh();
+  }
+
+  async function handleGenerateAnalysis() {
+    setAnalysisLoading(true);
+    setError("");
+    try {
+      const data = await api.generateWeeklyAnalysis();
+      setWeeklyAnalysis(data.analysis);
+    } catch (analysisError) {
+      setError(analysisError.message);
+    } finally {
+      setAnalysisLoading(false);
+    }
   }
 
   async function handleUpdateHolding(holding, updates) {
@@ -175,6 +201,7 @@ export default function PortfolioDashboard() {
           </div>
         </section>
         {error ? <p className="status error">{error}</p> : null}
+        <WeeklyAnalysis analysis={weeklyAnalysis} loading={analysisLoading} onGenerate={handleGenerateAnalysis} />
         <TrendChart loading={trendLoading} trends={trends} />
         <section className="content-grid">
           <HoldingsTable

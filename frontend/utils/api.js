@@ -18,6 +18,11 @@ async function request(path, options = {}) {
 export const api = {
   getOwners: () => request("/api/owners"),
   getTrends: (ownerId = "all") => request(`/api/trends?owner_id=${encodeURIComponent(ownerId)}`),
+  getWeeklyAnalysis: () => request("/api/weekly-analysis"),
+  generateWeeklyAnalysis: () =>
+    request("/api/weekly-analysis", {
+      method: "POST"
+    }),
   getHoldings: () => request("/api/holdings"),
   createHolding: (data) =>
     request("/api/holdings", {

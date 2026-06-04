@@ -13,6 +13,7 @@ function isPublicPath(pathname) {
   return (
     pathname === "/login" ||
     pathname === "/api/login" ||
+    pathname === "/api/cron/weekly-analysis" ||
     pathname.startsWith("/_next/") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
