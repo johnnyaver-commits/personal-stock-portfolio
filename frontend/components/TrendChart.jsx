@@ -8,12 +8,15 @@ const ranges = [
   { key: "yearly", label: "每年" }
 ];
 
-const series = [
-  { key: "twd_market_value", label: "台股市值", color: "#594ff4", currency: "TWD" },
-  { key: "usd_market_value", label: "美股市值", color: "#111111", currency: "USD" },
+const twdSeries = [
+  { key: "twd_market_value", label: "台股現值", color: "#594ff4", currency: "TWD" },
   { key: "twd_cost_basis", label: "台股付出成本", color: "#8c7bff", currency: "TWD" },
+  { key: "twd_unrealized_pnl", label: "台股未實現損益", color: "#0f8a4b", currency: "TWD" }
+];
+
+const usdSeries = [
+  { key: "usd_market_value", label: "美股現值", color: "#111111", currency: "USD" },
   { key: "usd_cost_basis", label: "美股付出成本", color: "#6b7280", currency: "USD" },
-  { key: "twd_unrealized_pnl", label: "台股未實現損益", color: "#0f8a4b", currency: "TWD" },
   { key: "usd_unrealized_pnl", label: "美股未實現損益", color: "#c46a16", currency: "USD" }
 ];
 
@@ -45,20 +48,23 @@ function changeStats(points, key) {
   return { first, latest, change, changePercent };
 }
 
-function buildPath(points, key) {
-  if (!points.length) return "";
-
-  const width = 320;
-  const height = 110;
-  const values = points.map((point) => Number(point[key] ?? 0));
+function scaleForSeries(points, items) {
+  const values = points.flatMap((point) => items.map((item) => Number(point[item.key] ?? 0)));
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
+  return { min, range };
+}
 
+function buildPath(points, key, scale) {
+  if (!points.length) return "";
+
+  const width = 620;
+  const height = 210;
   return points
     .map((point, index) => {
       const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width;
-      const y = height - ((Number(point[key] ?? 0) - min) / range) * height;
+      const y = height - ((Number(point[key] ?? 0) - scale.min) / scale.range) * height;
       return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
@@ -67,6 +73,7 @@ function buildPath(points, key) {
 function TrendCard({ item, points, range }) {
   const stats = changeStats(points, item.key);
   const isGain = stats.change >= 0;
+  const scale = scaleForSeries(points, [item]);
   const startLabel = labelForDate(points[0]?.snapshot_date, range);
   const endLabel = labelForDate(points.at(-1)?.snapshot_date, range);
 
@@ -81,17 +88,60 @@ function TrendCard({ item, points, range }) {
       </div>
       <strong>{money(stats.latest, item.currency)}</strong>
       <div className={isGain ? "trend-change gain" : "trend-change loss"}>
-        {isGain ? "上漲" : "下跌"} {money(Math.abs(stats.change), item.currency)}
+        {isGain ? "上升" : "下降"} {money(Math.abs(stats.change), item.currency)}
       </div>
-      <svg className="trend-sparkline" viewBox="0 0 340 130" role="img" aria-label={`${item.label}趨勢`}>
-        <line x1="10" y1="120" x2="330" y2="120" stroke="#e7e7e7" />
+      <svg className="trend-sparkline" viewBox="0 0 640 230" role="img" aria-label={`${item.label}趨勢`}>
+        <line x1="10" y1="220" x2="630" y2="220" stroke="#e7e7e7" />
         <g transform="translate(10 10)">
-          <path d={buildPath(points, item.key)} fill="none" stroke={item.color} strokeLinecap="round" strokeWidth="4" />
+          <path d={buildPath(points, item.key, scale)} fill="none" stroke={item.color} strokeLinecap="round" strokeWidth="4" />
         </g>
       </svg>
       <div className="trend-card-foot">
         <span>{startLabel}</span>
-        <span>{points.length} 筆資料</span>
+        <span>{points.length} 筆</span>
+        <span>{endLabel}</span>
+      </div>
+    </article>
+  );
+}
+
+function CombinedTrendChart({ title, items, points, range }) {
+  const scale = scaleForSeries(points, items);
+  const startLabel = labelForDate(points[0]?.snapshot_date, range);
+  const endLabel = labelForDate(points.at(-1)?.snapshot_date, range);
+
+  return (
+    <article className="trend-card trend-card-wide">
+      <div className="trend-card-top">
+        <span>{title}</span>
+        <em>{startLabel} - {endLabel}</em>
+      </div>
+      <div className="trend-combined-legend">
+        {items.map((item) => {
+          const stats = changeStats(points, item.key);
+          return (
+            <div className="trend-stat compact" key={item.key}>
+              <span>
+                <i style={{ backgroundColor: item.color }} />
+                {item.label}
+              </span>
+              <strong>{money(stats.latest, item.currency)}</strong>
+              <em className={stats.change >= 0 ? "gain" : "loss"}>{percent(stats.changePercent)}</em>
+            </div>
+          );
+        })}
+      </div>
+      <svg className="trend-chart" viewBox="0 0 640 250" role="img" aria-label={`${title}三線趨勢`}>
+        <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
+        <g transform="translate(10 10)">
+          {items.map((item) => (
+            <path d={buildPath(points, item.key, scale)} fill="none" key={item.key} stroke={item.color} strokeLinecap="round" strokeWidth="4" />
+          ))}
+        </g>
+      </svg>
+      <div className="trend-card-foot">
+        <span>{startLabel}</span>
+        <span>{points.length} 筆</span>
         <span>{endLabel}</span>
       </div>
     </article>
@@ -107,9 +157,9 @@ export default function TrendChart({ trends }) {
       <div className="panel-header trend-header">
         <div>
           <h2>資產趨勢</h2>
-          <p>每個指標獨立顯示漲跌幅，方便比較台股、美股與損益變化。</p>
+          <p>台股三項指標合併成一張圖表，方便比較現值、付出成本與未實現損益。</p>
         </div>
-        <div className="segmented" aria-label="趨勢區間">
+        <div className="segmented" aria-label="趨勢期間">
           {ranges.map((item) => (
             <button className={range === item.key ? "active" : ""} key={item.key} type="button" onClick={() => setRange(item.key)}>
               {item.label}
@@ -120,9 +170,12 @@ export default function TrendChart({ trends }) {
 
       <div className="trend-body trend-body-cards">
         {points.length ? (
-          series.map((item) => <TrendCard item={item} key={item.key} points={points} range={range} />)
+          <>
+            <CombinedTrendChart title="台股資產趨勢" items={twdSeries} points={points} range={range} />
+            {usdSeries.map((item) => <TrendCard item={item} key={item.key} points={points} range={range} />)}
+          </>
         ) : (
-          <div className="trend-empty">目前還沒有趨勢資料</div>
+          <div className="trend-empty">目前沒有趨勢資料</div>
         )}
       </div>
     </section>
