@@ -110,8 +110,10 @@ export default function PortfolioDashboard() {
       const currency = holding.currency === "TWD" ? "TWD" : "USD";
       totals[currency].marketValue += Number(holding.market_value ?? 0);
       totals[currency].costBasis += Number(holding.cost_basis ?? 0);
-      totals[currency].pnl += Number(holding.unrealized_pnl ?? 0);
     }
+
+    totals.TWD.pnl = totals.TWD.marketValue - totals.TWD.costBasis;
+    totals.USD.pnl = totals.USD.marketValue - totals.USD.costBasis;
 
     return totals;
   }, [filteredHoldings]);
@@ -189,8 +191,16 @@ export default function PortfolioDashboard() {
             <strong>{formatMoney(summary.TWD.marketValue, "TWD")}</strong>
           </div>
           <div className="metric">
+            <span>台股庫存成本</span>
+            <strong>{formatMoney(summary.TWD.costBasis, "TWD")}</strong>
+          </div>
+          <div className="metric">
             <span>美股市值</span>
             <strong>{formatMoney(summary.USD.marketValue, "USD")}</strong>
+          </div>
+          <div className="metric">
+            <span>美股庫存成本</span>
+            <strong>{formatMoney(summary.USD.costBasis, "USD")}</strong>
           </div>
           <div className="metric">
             <span>未實現損益</span>
