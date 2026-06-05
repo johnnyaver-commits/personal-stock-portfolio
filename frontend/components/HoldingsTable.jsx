@@ -55,7 +55,8 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
               <th>代號</th>
               <th>名稱</th>
               <th>數量（股）</th>
-              <th>平均成本</th>
+              <th>成交均價</th>
+              <th>付出成本</th>
               <th>現價</th>
               <th>市值</th>
               <th>未實現損益</th>
@@ -93,7 +94,7 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
                       number(holding.quantity)
                     )}
                   </td>
-                  <td data-label="平均成本">
+                  <td data-label="成交均價">
                     {isEditing ? (
                       <input
                         className="edit-input"
@@ -108,6 +109,7 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
                       money(holding.avg_cost, holding.currency)
                     )}
                   </td>
+                  <td data-label="付出成本">{money(holding.cost_basis, holding.currency)}</td>
                   <td data-label="現價">{money(holding.current_price, holding.currency)}</td>
                   <td data-label="市值">{money(holding.market_value, holding.currency)}</td>
                   <td data-label="未實現損益" className={trendClass}>

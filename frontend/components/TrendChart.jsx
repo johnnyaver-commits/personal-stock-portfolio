@@ -11,8 +11,8 @@ const ranges = [
 const series = [
   { key: "twd_market_value", label: "台股市值", color: "#594ff4", currency: "TWD" },
   { key: "usd_market_value", label: "美股市值", color: "#111111", currency: "USD" },
-  { key: "twd_cost_basis", label: "台股庫存成本", color: "#8c7bff", currency: "TWD" },
-  { key: "usd_cost_basis", label: "美股庫存成本", color: "#6b7280", currency: "USD" },
+  { key: "twd_cost_basis", label: "台股付出成本", color: "#8c7bff", currency: "TWD" },
+  { key: "usd_cost_basis", label: "美股付出成本", color: "#6b7280", currency: "USD" },
   { key: "twd_unrealized_pnl", label: "台股未實現損益", color: "#0f8a4b", currency: "TWD" },
   { key: "usd_unrealized_pnl", label: "美股未實現損益", color: "#c46a16", currency: "USD" }
 ];

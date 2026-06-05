@@ -10,7 +10,7 @@ export async function GET() {
 export async function POST(request) {
   const body = await request.json();
   if (!body.symbol || Number(body.quantity) < 0 || Number(body.avg_cost) < 0) {
-    return NextResponse.json({ message: "symbol, quantity and avg_cost are required" }, { status: 400 });
+    return NextResponse.json({ message: "symbol, quantity and trade average price are required" }, { status: 400 });
   }
   return NextResponse.json({ holding: await createHolding(body) }, { status: 201 });
 }

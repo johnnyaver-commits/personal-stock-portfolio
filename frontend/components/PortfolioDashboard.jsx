@@ -141,7 +141,7 @@ export default function PortfolioDashboard() {
 
   async function handleUpdateHolding(holding, updates) {
     if (updates.quantity < 0 || updates.avg_cost < 0 || Number.isNaN(updates.quantity) || Number.isNaN(updates.avg_cost)) {
-      setError("數量和平均成本必須是 0 以上的數字");
+      setError("數量和成交均價必須是 0 以上的數字");
       return;
     }
 
@@ -191,7 +191,7 @@ export default function PortfolioDashboard() {
             <strong>{formatMoney(summary.TWD.marketValue, "TWD")}</strong>
           </div>
           <div className="metric">
-            <span>台股庫存成本</span>
+            <span>台股付出成本</span>
             <strong>{formatMoney(summary.TWD.costBasis, "TWD")}</strong>
           </div>
           <div className="metric">
@@ -199,7 +199,7 @@ export default function PortfolioDashboard() {
             <strong>{formatMoney(summary.USD.marketValue, "USD")}</strong>
           </div>
           <div className="metric">
-            <span>美股庫存成本</span>
+            <span>美股付出成本</span>
             <strong>{formatMoney(summary.USD.costBasis, "USD")}</strong>
           </div>
           <div className="metric">
