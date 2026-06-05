@@ -13,27 +13,50 @@ function number(value) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 4 }).format(Number(value ?? 0));
 }
 
+function toNumber(value) {
+  return Number(value || 0);
+}
+
 export default function HoldingsTable({ holdings, deletingId, savingId, showOwner = false, onDelete, onUpdate }) {
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ quantity: "", avg_cost: "" });
+  const [editForm, setEditForm] = useState({ quantity: "", avg_cost: "", cost_basis: "" });
 
   function startEdit(holding) {
     setEditingId(holding.id);
     setEditForm({
       quantity: String(holding.quantity ?? ""),
-      avg_cost: String(holding.avg_cost ?? "")
+      avg_cost: String(holding.avg_cost ?? ""),
+      cost_basis: String(holding.cost_basis ?? "")
     });
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setEditForm({ quantity: "", avg_cost: "" });
+    setEditForm({ quantity: "", avg_cost: "", cost_basis: "" });
+  }
+
+  function updateEditForm(name, value) {
+    setEditForm((current) => {
+      const next = { ...current, [name]: value };
+      const quantity = toNumber(next.quantity);
+
+      if (name === "cost_basis") {
+        next.avg_cost = quantity > 0 ? String(toNumber(value) / quantity) : "0";
+      } else if (name === "quantity" || name === "avg_cost") {
+        next.cost_basis = String(toNumber(next.quantity) * toNumber(next.avg_cost));
+      }
+
+      return next;
+    });
   }
 
   async function saveEdit(holding) {
+    const quantity = toNumber(editForm.quantity);
+    const paidCost = toNumber(editForm.cost_basis);
+
     await onUpdate(holding, {
-      quantity: Number(editForm.quantity),
-      avg_cost: Number(editForm.avg_cost)
+      quantity,
+      avg_cost: quantity > 0 ? paidCost / quantity : 0
     });
     cancelEdit();
   }
@@ -42,10 +65,10 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
     <section className="panel" id="holdings">
       <div className="panel-header">
         <div>
-          <h2>持股庫存</h2>
+          <h2>股票庫存</h2>
           <p>{showOwner ? "整合顯示所有持有人的股票，並保留個別歸屬。" : "顯示目前持有人的股票庫存與損益。"}</p>
         </div>
-        <span className="status pill">{holdings.length} 筆持股</span>
+        <span className="status pill">{holdings.length} 筆庫存</span>
       </div>
       <div className="table-wrap">
         <table>
@@ -58,9 +81,9 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
               <th>成交均價</th>
               <th>付出成本</th>
               <th>現價</th>
-              <th>市值</th>
+              <th>現值</th>
               <th>未實現損益</th>
-              <th>更新時間</th>
+              <th>報價時間</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -85,7 +108,7 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
                         className="edit-input"
                         min="0"
                         name="quantity"
-                        onChange={(event) => setEditForm((current) => ({ ...current, quantity: event.target.value }))}
+                        onChange={(event) => updateEditForm("quantity", event.target.value)}
                         step="0.0001"
                         type="number"
                         value={editForm.quantity}
@@ -100,7 +123,7 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
                         className="edit-input"
                         min="0"
                         name="avg_cost"
-                        onChange={(event) => setEditForm((current) => ({ ...current, avg_cost: event.target.value }))}
+                        onChange={(event) => updateEditForm("avg_cost", event.target.value)}
                         step="0.01"
                         type="number"
                         value={editForm.avg_cost}
@@ -109,14 +132,28 @@ export default function HoldingsTable({ holdings, deletingId, savingId, showOwne
                       money(holding.avg_cost, holding.currency)
                     )}
                   </td>
-                  <td data-label="付出成本">{money(holding.cost_basis, holding.currency)}</td>
+                  <td data-label="付出成本">
+                    {isEditing ? (
+                      <input
+                        className="edit-input"
+                        min="0"
+                        name="cost_basis"
+                        onChange={(event) => updateEditForm("cost_basis", event.target.value)}
+                        step="0.01"
+                        type="number"
+                        value={editForm.cost_basis}
+                      />
+                    ) : (
+                      money(holding.cost_basis, holding.currency)
+                    )}
+                  </td>
                   <td data-label="現價">{money(holding.current_price, holding.currency)}</td>
-                  <td data-label="市值">{money(holding.market_value, holding.currency)}</td>
+                  <td data-label="現值">{money(holding.market_value, holding.currency)}</td>
                   <td data-label="未實現損益" className={trendClass}>
                     {money(holding.unrealized_pnl, holding.currency)}
                     <div className="subtle">{number(holding.unrealized_pnl_percent)}%</div>
                   </td>
-                  <td data-label="更新時間">
+                  <td data-label="報價時間">
                     <span className="subtle">{new Date(holding.quote_time).toLocaleTimeString("zh-TW")}</span>
                   </td>
                   <td data-label="操作">
