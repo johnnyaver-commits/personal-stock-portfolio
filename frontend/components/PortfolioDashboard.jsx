@@ -184,10 +184,10 @@ export default function PortfolioDashboard() {
         <section className="summary-grid" id="overview">
           <div className="metric primary">
             <span>{viewName}</span>
-            <strong>{filteredHoldings.length} 筆持股</strong>
+            <strong>{filteredHoldings.length} 筆庫存</strong>
           </div>
           <div className="metric">
-            <span>台股市值</span>
+            <span>台股現值</span>
             <strong>{formatMoney(summary.TWD.marketValue, "TWD")}</strong>
           </div>
           <div className="metric">
@@ -195,7 +195,11 @@ export default function PortfolioDashboard() {
             <strong>{formatMoney(summary.TWD.costBasis, "TWD")}</strong>
           </div>
           <div className="metric">
-            <span>美股市值</span>
+            <span>台股未實現損益</span>
+            <strong className={summary.TWD.pnl >= 0 ? "gain" : "loss"}>{formatMoney(summary.TWD.pnl, "TWD")}</strong>
+          </div>
+          <div className="metric">
+            <span>美股現值</span>
             <strong>{formatMoney(summary.USD.marketValue, "USD")}</strong>
           </div>
           <div className="metric">
@@ -203,11 +207,8 @@ export default function PortfolioDashboard() {
             <strong>{formatMoney(summary.USD.costBasis, "USD")}</strong>
           </div>
           <div className="metric">
-            <span>未實現損益</span>
-            <strong>
-              <span className={summary.TWD.pnl >= 0 ? "gain" : "loss"}>{formatMoney(summary.TWD.pnl, "TWD")}</span>
-              <span className={summary.USD.pnl >= 0 ? "gain metric-line" : "loss metric-line"}>{formatMoney(summary.USD.pnl, "USD")}</span>
-            </strong>
+            <span>美股未實現損益</span>
+            <strong className={summary.USD.pnl >= 0 ? "gain" : "loss"}>{formatMoney(summary.USD.pnl, "USD")}</strong>
           </div>
         </section>
         {error ? <p className="status error">{error}</p> : null}
