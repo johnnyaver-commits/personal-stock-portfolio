@@ -11,7 +11,8 @@ const ranges = [
 const series = [
   { key: "twd_market_value", label: "台股市值", color: "#594ff4", currency: "TWD" },
   { key: "usd_market_value", label: "美股市值", color: "#111111", currency: "USD" },
-  { key: "total_unrealized_pnl", label: "未實現損益", color: "#0f8a4b", currency: "TWD" }
+  { key: "twd_unrealized_pnl", label: "台股未實現損益", color: "#0f8a4b", currency: "TWD" },
+  { key: "usd_unrealized_pnl", label: "美股未實現損益", color: "#c46a16", currency: "USD" }
 ];
 
 function money(value, currency = "TWD") {
@@ -32,13 +33,6 @@ function labelForDate(value, range) {
   if (range === "yearly") return value.slice(0, 4);
   if (range === "monthly") return value.slice(0, 7);
   return value.slice(5);
-}
-
-function normalizePoint(point) {
-  return {
-    ...point,
-    total_unrealized_pnl: Number(point.twd_unrealized_pnl ?? 0) + Number(point.usd_unrealized_pnl ?? 0)
-  };
 }
 
 function changeStats(points, key) {
@@ -104,7 +98,7 @@ function TrendCard({ item, points, range }) {
 
 export default function TrendChart({ trends }) {
   const [range, setRange] = useState("daily");
-  const points = useMemo(() => (trends?.[range] ?? []).map(normalizePoint), [trends, range]);
+  const points = useMemo(() => trends?.[range] ?? [], [trends, range]);
 
   return (
     <section className="panel trend-panel" id="trends">
