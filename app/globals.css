@@ -530,6 +530,12 @@ button:disabled {
   font-weight: 900;
 }
 
+.trend-stat.compact small {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
 .trend-card-top,
 .trend-card-foot {
   display: flex;

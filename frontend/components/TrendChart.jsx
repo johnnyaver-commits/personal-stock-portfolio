@@ -126,7 +126,10 @@ function CombinedTrendChart({ title, items, points, range }) {
                 {item.label}
               </span>
               <strong>{money(stats.latest, item.currency)}</strong>
-              <em className={stats.change >= 0 ? "gain" : "loss"}>{percent(stats.changePercent)}</em>
+              <small className={stats.change >= 0 ? "gain" : "loss"}>
+                {stats.change >= 0 ? "+" : "-"}
+                {money(Math.abs(stats.change), item.currency)} · {percent(stats.changePercent)}
+              </small>
             </div>
           );
         })}
