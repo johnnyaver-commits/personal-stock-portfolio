@@ -175,7 +175,7 @@ export default function TrendChart({ trends }) {
         {points.length ? (
           <>
             <CombinedTrendChart title="台股資產趨勢" items={twdSeries} points={points} range={range} />
-            {usdSeries.map((item) => <TrendCard item={item} key={item.key} points={points} range={range} />)}
+            <CombinedTrendChart title="美股資產趨勢" items={usdSeries} points={points} range={range} />
           </>
         ) : (
           <div className="trend-empty">目前沒有趨勢資料</div>
