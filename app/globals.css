@@ -615,6 +615,73 @@ button:disabled {
   font-weight: 700;
 }
 
+.trend-chart-interactive {
+  display: grid;
+  gap: 8px;
+}
+
+.trend-cursor-line {
+  stroke: #111111;
+  stroke-dasharray: 6 6;
+  stroke-linecap: round;
+  stroke-width: 2;
+  opacity: 0.72;
+}
+
+.trend-cursor-dot {
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.trend-cursor-range {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.trend-cursor-readout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-soft);
+  padding: 12px;
+}
+
+.trend-cursor-date,
+.trend-cursor-value {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.trend-cursor-date span,
+.trend-cursor-value span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trend-cursor-value i {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+
+.trend-cursor-date strong,
+.trend-cursor-value strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .trend-day-slider {
   display: grid;
   gap: 10px;
@@ -1230,6 +1297,10 @@ td {
   }
 
   .trend-combined-legend {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-cursor-readout {
     grid-template-columns: 1fr;
   }
 
