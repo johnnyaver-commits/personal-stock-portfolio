@@ -682,6 +682,12 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.trend-cursor-value small {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
 .trend-day-slider {
   display: grid;
   gap: 10px;

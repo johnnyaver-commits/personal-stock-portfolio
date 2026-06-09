@@ -78,6 +78,14 @@ function changeStats(points, key) {
   return { first, latest, change, changePercent };
 }
 
+function pointChangeStats(points, point, key) {
+  const first = Number(points[0]?.[key] ?? 0);
+  const current = Number(point?.[key] ?? 0);
+  const change = current - first;
+  const changePercent = first === 0 ? 0 : (change / Math.abs(first)) * 100;
+  return { change, changePercent };
+}
+
 function scaleForSeries(points, items) {
   const values = points.flatMap((point) => items.map((item) => Number(point[item.key] ?? 0)));
   const min = Math.min(...values);
@@ -195,17 +203,24 @@ function CombinedTrendChart({ title, items, points, range, interactive = false }
             <span>{text.date}</span>
             <strong>{selectedPoint.snapshot_date}</strong>
           </div>
-          {items.map((item) => (
-            <div className="trend-cursor-value" key={item.key}>
-              <span>
-                <i style={{ backgroundColor: item.color }} />
-                {item.label}
-              </span>
-              <strong className={item.key.includes("pnl") ? (Number(selectedPoint[item.key] ?? 0) >= 0 ? "gain" : "loss") : ""}>
-                {money(selectedPoint[item.key], item.currency)}
-              </strong>
-            </div>
-          ))}
+          {items.map((item) => {
+            const selectedStats = pointChangeStats(points, selectedPoint, item.key);
+            return (
+              <div className="trend-cursor-value" key={item.key}>
+                <span>
+                  <i style={{ backgroundColor: item.color }} />
+                  {item.label}
+                </span>
+                <strong className={item.key.includes("pnl") ? (Number(selectedPoint[item.key] ?? 0) >= 0 ? "gain" : "loss") : ""}>
+                  {money(selectedPoint[item.key], item.currency)}
+                </strong>
+                <small className={selectedStats.change >= 0 ? "gain" : "loss"}>
+                  {selectedStats.change >= 0 ? "+" : "-"}
+                  {money(Math.abs(selectedStats.change), item.currency)} / {percent(selectedStats.changePercent)}
+                </small>
+              </div>
+            );
+          })}
         </div>
       ) : null}
     </article>
