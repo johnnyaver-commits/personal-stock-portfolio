@@ -251,7 +251,7 @@ export default function TrendChart({ trends }) {
         {points.length ? (
           <>
             <CombinedTrendChart interactive title={text.twdTrend} items={twdSeries} points={points} range={range} />
-            <CombinedTrendChart title={text.usdTrend} items={usdSeries} points={points} range={range} />
+            <CombinedTrendChart interactive title={text.usdTrend} items={usdSeries} points={points} range={range} />
           </>
         ) : (
           <div className="trend-empty">{text.noData}</div>
