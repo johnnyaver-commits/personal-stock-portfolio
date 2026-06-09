@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "@/frontend/components/Header";
 import HoldingsTable from "@/frontend/components/HoldingsTable";
 import PriceChart from "@/frontend/components/PriceChart";
+import PhisonShareholderTrend from "@/frontend/components/PhisonShareholderTrend";
 import TradeForm from "@/frontend/components/TradeForm";
 import TrendChart from "@/frontend/components/TrendChart";
 import WeeklyAnalysis from "@/frontend/components/WeeklyAnalysis";
@@ -213,6 +214,7 @@ export default function PortfolioDashboard() {
         </section>
         {error ? <p className="status error">{error}</p> : null}
         <WeeklyAnalysis analysis={weeklyAnalysis} loading={analysisLoading} onGenerate={handleGenerateAnalysis} />
+        <PhisonShareholderTrend />
         <TrendChart loading={trendLoading} trends={trends} />
         <section className="content-grid">
           <HoldingsTable
