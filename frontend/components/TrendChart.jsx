@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const ranges = [
   { key: "daily", label: "每日" },
@@ -70,45 +70,17 @@ function buildPath(points, key, scale) {
     .join(" ");
 }
 
-function TrendCard({ item, points, range }) {
-  const stats = changeStats(points, item.key);
-  const isGain = stats.change >= 0;
-  const scale = scaleForSeries(points, [item]);
-  const startLabel = labelForDate(points[0]?.snapshot_date, range);
-  const endLabel = labelForDate(points.at(-1)?.snapshot_date, range);
-
-  return (
-    <article className="trend-card">
-      <div className="trend-card-top">
-        <span>
-          <i style={{ backgroundColor: item.color }} />
-          {item.label}
-        </span>
-        <em className={isGain ? "gain" : "loss"}>{percent(stats.changePercent)}</em>
-      </div>
-      <strong>{money(stats.latest, item.currency)}</strong>
-      <div className={isGain ? "trend-change gain" : "trend-change loss"}>
-        {isGain ? "上升" : "下降"} {money(Math.abs(stats.change), item.currency)}
-      </div>
-      <svg className="trend-sparkline" viewBox="0 0 640 230" role="img" aria-label={`${item.label}趨勢`}>
-        <line x1="10" y1="220" x2="630" y2="220" stroke="#e7e7e7" />
-        <g transform="translate(10 10)">
-          <path d={buildPath(points, item.key, scale)} fill="none" stroke={item.color} strokeLinecap="round" strokeWidth="4" />
-        </g>
-      </svg>
-      <div className="trend-card-foot">
-        <span>{startLabel}</span>
-        <span>{points.length} 筆</span>
-        <span>{endLabel}</span>
-      </div>
-    </article>
-  );
-}
-
-function CombinedTrendChart({ title, items, points, range }) {
+function CombinedTrendChart({ title, items, points, range, focusKey, focusLabel }) {
+  const [selectedIndex, setSelectedIndex] = useState(Math.max(points.length - 1, 0));
   const scale = scaleForSeries(points, items);
   const startLabel = labelForDate(points[0]?.snapshot_date, range);
   const endLabel = labelForDate(points.at(-1)?.snapshot_date, range);
+  const selectedPoint = points[selectedIndex] ?? points.at(-1);
+  const focusItem = items.find((item) => item.key === focusKey);
+
+  useEffect(() => {
+    setSelectedIndex(Math.max(points.length - 1, 0));
+  }, [points.length, range]);
 
   return (
     <article className="trend-card trend-card-wide">
@@ -116,6 +88,7 @@ function CombinedTrendChart({ title, items, points, range }) {
         <span>{title}</span>
         <em>{startLabel} - {endLabel}</em>
       </div>
+
       <div className="trend-combined-legend">
         {items.map((item) => {
           const stats = changeStats(points, item.key);
@@ -128,13 +101,14 @@ function CombinedTrendChart({ title, items, points, range }) {
               <strong>{money(stats.latest, item.currency)}</strong>
               <small className={stats.change >= 0 ? "gain" : "loss"}>
                 {stats.change >= 0 ? "+" : "-"}
-                {money(Math.abs(stats.change), item.currency)} · {percent(stats.changePercent)}
+                {money(Math.abs(stats.change), item.currency)} / {percent(stats.changePercent)}
               </small>
             </div>
           );
         })}
       </div>
-      <svg className="trend-chart" viewBox="0 0 640 250" role="img" aria-label={`${title}三線趨勢`}>
+
+      <svg className="trend-chart" viewBox="0 0 640 250" role="img" aria-label={`${title}圖表`}>
         <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
         <g transform="translate(10 10)">
           {items.map((item) => (
@@ -142,11 +116,31 @@ function CombinedTrendChart({ title, items, points, range }) {
           ))}
         </g>
       </svg>
+
       <div className="trend-card-foot">
         <span>{startLabel}</span>
         <span>{points.length} 筆</span>
         <span>{endLabel}</span>
       </div>
+
+      {focusKey && selectedPoint && focusItem ? (
+        <div className="trend-day-slider">
+          <div>
+            <span>{selectedPoint.snapshot_date}</span>
+            <strong className={Number(selectedPoint[focusKey] ?? 0) >= 0 ? "gain" : "loss"}>
+              {focusLabel} {money(selectedPoint[focusKey], focusItem.currency)}
+            </strong>
+          </div>
+          <input
+            aria-label={`${focusLabel}日期`}
+            max={Math.max(points.length - 1, 0)}
+            min="0"
+            onChange={(event) => setSelectedIndex(Number(event.target.value))}
+            type="range"
+            value={selectedIndex}
+          />
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -160,9 +154,9 @@ export default function TrendChart({ trends }) {
       <div className="panel-header trend-header">
         <div>
           <h2>資產趨勢</h2>
-          <p>台股三項指標合併成一張圖表，方便比較現值、付出成本與未實現損益。</p>
+          <p>台股與美股現值、付出成本、未實現損益走勢，從 6/5 基準資料開始顯示。</p>
         </div>
-        <div className="segmented" aria-label="趨勢期間">
+        <div className="segmented" aria-label="趨勢範圍">
           {ranges.map((item) => (
             <button className={range === item.key ? "active" : ""} key={item.key} type="button" onClick={() => setRange(item.key)}>
               {item.label}
@@ -174,11 +168,11 @@ export default function TrendChart({ trends }) {
       <div className="trend-body trend-body-cards">
         {points.length ? (
           <>
-            <CombinedTrendChart title="台股資產趨勢" items={twdSeries} points={points} range={range} />
+            <CombinedTrendChart focusKey="twd_unrealized_pnl" focusLabel="當日台股獲利" title="台股資產趨勢" items={twdSeries} points={points} range={range} />
             <CombinedTrendChart title="美股資產趨勢" items={usdSeries} points={points} range={range} />
           </>
         ) : (
-          <div className="trend-empty">目前沒有趨勢資料</div>
+          <div className="trend-empty">尚無趨勢資料</div>
         )}
       </div>
     </section>

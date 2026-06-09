@@ -615,6 +615,38 @@ button:disabled {
   font-weight: 700;
 }
 
+.trend-day-slider {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-soft);
+  padding: 12px;
+}
+
+.trend-day-slider > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trend-day-slider span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trend-day-slider strong {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.trend-day-slider input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
 .side-stack {
   display: grid;
   gap: 24px;
@@ -1216,6 +1248,11 @@ td {
 
   .trend-card > strong {
     font-size: 20px;
+  }
+
+  .trend-day-slider > div {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .trend-sparkline {
