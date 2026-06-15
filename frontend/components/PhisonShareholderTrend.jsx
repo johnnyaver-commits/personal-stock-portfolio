@@ -79,6 +79,10 @@ function scaleForSeries(points, items) {
   return { min, range };
 }
 
+function percentageScale() {
+  return { min: 0, range: 100 };
+}
+
 function buildPath(points, key, scale) {
   const available = points.filter((point) => finiteValue(point, key) != null);
   const width = 620;
@@ -96,7 +100,7 @@ export default function PhisonShareholderTrend() {
   const [trend, setTrend] = useState([]);
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
-  const scale = useMemo(() => scaleForSeries(trend, series), [trend]);
+  const scale = useMemo(() => percentageScale(), []);
 
   useEffect(() => {
     let active = true;
@@ -160,6 +164,11 @@ export default function PhisonShareholderTrend() {
           </div>
           <svg className="trend-chart shareholder-chart" viewBox="0 0 640 250" role="img" aria-label={text.chartLabel}>
             <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
+            <line x1="10" y1="20" x2="630" y2="20" stroke="#ececec" />
+            <line x1="10" y1="125" x2="630" y2="125" stroke="#ececec" />
+            <text x="612" y="17" fill="#8b8b8b" fontSize="12" fontWeight="800">100%</text>
+            <text x="618" y="121" fill="#8b8b8b" fontSize="12" fontWeight="800">50%</text>
+            <text x="624" y="244" fill="#8b8b8b" fontSize="12" fontWeight="800">0%</text>
             <g transform="translate(10 10)">
               {series.map((item) => (
                 <path d={buildPath(trend, item.key, scale)} fill="none" key={item.key} stroke={item.color} strokeLinecap="round" strokeWidth="4" />
