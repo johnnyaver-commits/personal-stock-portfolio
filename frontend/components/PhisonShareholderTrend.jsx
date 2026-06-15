@@ -1,7 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/frontend/utils/api";
+
+const text = {
+  title: "\u7fa4\u806f\u80a1\u6771\u7d50\u69cb\u8da8\u52e2",
+  description:
+    "\u8cc7\u6599\u4f86\u6e90 TDCC \u96c6\u4fdd\u6236\u80a1\u6b0a\u5206\u6563\u8868\uff1b\u516c\u958b\u8cc7\u6599\u70ba\u6bcf\u9031\u66f4\u65b0\uff0c\u7db2\u7ad9\u6bcf\u65e5\u6aa2\u67e5\u65b0\u8cc7\u6599\u3002",
+  dataDate: "\u8cc7\u6599\u65e5",
+  records: "\u7b46",
+  loading: "\u6b63\u5728\u8b80\u53d6\u7fa4\u806f\u80a1\u6771\u7d50\u69cb\u8cc7\u6599",
+  chartLabel: "\u7fa4\u806f\u80a1\u6771\u7d50\u69cb\u8da8\u52e2",
+  holders: "\u4eba\u6578",
+  lots: "\u5f35\u6578",
+  percentage: "\u6301\u80a1\u6bd4\u4f8b",
+  over1: ">1 \u5f35",
+  over10: ">10 \u5f35",
+  over100: ">100 \u5f35",
+  over400: ">400 \u5f35",
+  over1000: ">1000 \u5f35"
+};
+
+const series = [
+  { key: "over_1_lot_percentage", holderKey: "over_1_lot_holders", sharesKey: "over_1_lot_shares", label: text.over1, color: "#594ff4" },
+  { key: "over_10_lot_percentage", holderKey: "over_10_lot_holders", sharesKey: "over_10_lot_shares", label: text.over10, color: "#0f8a4b" },
+  { key: "over_100_lot_percentage", holderKey: "over_100_lot_holders", sharesKey: "over_100_lot_shares", label: text.over100, color: "#c46a16" },
+  { key: "over_400_lot_percentage", holderKey: "over_400_lot_holders", sharesKey: "over_400_lot_shares", label: text.over400, color: "#0f766e" },
+  { key: "large_percentage", holderKey: "large_holders", sharesKey: "large_shares", label: text.over1000, color: "#111111" }
+];
 
 function number(value, digits = 0) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: digits }).format(Number(value ?? 0));
@@ -15,16 +41,23 @@ function labelForDate(value) {
   return String(value ?? "").slice(5);
 }
 
+function finiteValue(point, key) {
+  const value = Number(point?.[key]);
+  return Number.isFinite(value) ? value : null;
+}
+
 function changeStats(points, key) {
-  const first = Number(points[0]?.[key] ?? 0);
-  const latest = Number(points.at(-1)?.[key] ?? 0);
+  const available = points.filter((point) => finiteValue(point, key) != null);
+  const first = Number(available[0]?.[key] ?? 0);
+  const latest = Number(available.at(-1)?.[key] ?? 0);
   const change = latest - first;
   const changePercent = first === 0 ? 0 : (change / Math.abs(first)) * 100;
   return { first, latest, change, changePercent };
 }
 
 function scaleForSeries(points, items) {
-  const values = points.flatMap((point) => items.map((item) => Number(point[item.key] ?? 0)));
+  const values = points.flatMap((point) => items.map((item) => finiteValue(point, item.key))).filter((value) => value != null);
+  if (!values.length) return { min: 0, range: 1 };
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
@@ -32,27 +65,23 @@ function scaleForSeries(points, items) {
 }
 
 function buildPath(points, key, scale) {
+  const available = points.filter((point) => finiteValue(point, key) != null);
   const width = 620;
   const height = 210;
-  return points
+  return available
     .map((point, index) => {
-      const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width;
+      const x = available.length === 1 ? width / 2 : (index / (available.length - 1)) * width;
       const y = height - ((Number(point[key] ?? 0) - scale.min) / scale.range) * height;
       return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
 }
 
-const series = [
-  { key: "large_percentage", label: "千張大戶持股比例", color: "#594ff4", format: percent },
-  { key: "large_holders", label: "千張大戶人數", color: "#0f8a4b", format: (value) => `${number(value)} 人` },
-  { key: "large_shares_lots", label: "千張大戶持有張數", color: "#c46a16", format: (value) => `${number(value)} 張` }
-];
-
 export default function PhisonShareholderTrend() {
   const [trend, setTrend] = useState([]);
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
+  const scale = useMemo(() => scaleForSeries(trend, series), [trend]);
 
   useEffect(() => {
     let active = true;
@@ -60,10 +89,7 @@ export default function PhisonShareholderTrend() {
       .getPhisonShareholders()
       .then((data) => {
         if (!active) return;
-        const points = (data.trend ?? []).map((point) => ({
-          ...point,
-          large_shares_lots: Number(point.large_shares ?? 0) / 1000
-        }));
+        const points = data.trend ?? [];
         setTrend(points);
         setLatest(data.latest ?? points.at(-1) ?? null);
       })
@@ -79,51 +105,54 @@ export default function PhisonShareholderTrend() {
     <section className="panel shareholder-panel" id="phison-shareholders">
       <div className="panel-header">
         <div>
-          <h2>群聯千張大戶趨勢</h2>
-          <p>資料來源 TDCC 集保戶股權分散表；公開資料為每週更新，網站每日檢查新資料。</p>
+          <h2>{text.title}</h2>
+          <p>{text.description}</p>
         </div>
-        {latest ? <span className="status pill">資料日 {latest.snapshot_date}</span> : null}
+        {latest ? <span className="status pill">{text.dataDate} {latest.snapshot_date}</span> : null}
       </div>
 
       {error ? <p className="status error shareholder-status">{error}</p> : null}
 
       {trend.length ? (
         <div className="shareholder-body">
-          <div className="trend-combined-legend">
+          <div className="trend-combined-legend shareholder-legend-grid">
             {series.map((item) => {
               const stats = changeStats(trend, item.key);
               return (
                 <div className="trend-stat compact" key={item.key}>
                   <span>
                     <i style={{ backgroundColor: item.color }} />
-                    {item.label}
+                    {item.label} {text.percentage}
                   </span>
-                  <strong>{item.format(stats.latest)}</strong>
+                  <strong>{percent(stats.latest)}</strong>
                   <small className={stats.change >= 0 ? "gain" : "loss"}>
                     {stats.change >= 0 ? "+" : "-"}
-                    {item.format(Math.abs(stats.change))} · {stats.changePercent >= 0 ? "+" : ""}
+                    {Math.abs(stats.change).toFixed(2)} pct / {stats.changePercent >= 0 ? "+" : ""}
                     {stats.changePercent.toFixed(2)}%
                   </small>
+                  <em>
+                    {text.holders} {number(latest?.[item.holderKey])} / {text.lots} {number(Number(latest?.[item.sharesKey] ?? 0) / 1000)}
+                  </em>
                 </div>
               );
             })}
           </div>
-          <svg className="trend-chart shareholder-chart" viewBox="0 0 640 250" role="img" aria-label="群聯千張大戶趨勢">
+          <svg className="trend-chart shareholder-chart" viewBox="0 0 640 250" role="img" aria-label={text.chartLabel}>
             <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
             <g transform="translate(10 10)">
               {series.map((item) => (
-                <path d={buildPath(trend, item.key, scaleForSeries(trend, [item]))} fill="none" key={item.key} stroke={item.color} strokeLinecap="round" strokeWidth="4" />
+                <path d={buildPath(trend, item.key, scale)} fill="none" key={item.key} stroke={item.color} strokeLinecap="round" strokeWidth="4" />
               ))}
             </g>
           </svg>
           <div className="trend-card-foot shareholder-foot">
             <span>{labelForDate(trend[0]?.snapshot_date)}</span>
-            <span>{trend.length} 筆</span>
+            <span>{trend.length} {text.records}</span>
             <span>{labelForDate(trend.at(-1)?.snapshot_date)}</span>
           </div>
         </div>
       ) : !error ? (
-        <div className="trend-empty">正在讀取群聯股權分散資料</div>
+        <div className="trend-empty">{text.loading}</div>
       ) : null}
     </section>
   );

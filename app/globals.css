@@ -557,6 +557,10 @@ button:disabled {
   padding: 0 4px;
 }
 
+.shareholder-legend-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .trend-card-top,
 .trend-card-foot {
   display: flex;
@@ -1303,6 +1307,10 @@ td {
   }
 
   .trend-combined-legend {
+    grid-template-columns: 1fr;
+  }
+
+  .shareholder-legend-grid {
     grid-template-columns: 1fr;
   }
 
