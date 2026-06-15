@@ -14,6 +14,8 @@ const text = {
   holders: "\u4eba\u6578",
   lots: "\u5f35\u6578",
   percentage: "\u6301\u80a1\u6bd4\u4f8b",
+  latest: "\u6700\u65b0",
+  change: "\u5dee\u503c",
   over1: ">1 \u5f35",
   over10: ">10 \u5f35",
   over100: ">100 \u5f35",
@@ -53,6 +55,19 @@ function changeStats(points, key) {
   const change = latest - first;
   const changePercent = first === 0 ? 0 : (change / Math.abs(first)) * 100;
   return { first, latest, change, changePercent };
+}
+
+function valueStats(points, key) {
+  const available = points.filter((point) => finiteValue(point, key) != null);
+  const first = Number(available[0]?.[key] ?? 0);
+  const latest = Number(available.at(-1)?.[key] ?? 0);
+  return { first, latest, change: latest - first };
+}
+
+function signedNumber(value, digits = 0) {
+  const numberValue = Number(value ?? 0);
+  const sign = numberValue >= 0 ? "+" : "-";
+  return `${sign}${number(Math.abs(numberValue), digits)}`;
 }
 
 function scaleForSeries(points, items) {
@@ -117,22 +132,28 @@ export default function PhisonShareholderTrend() {
         <div className="shareholder-body">
           <div className="trend-combined-legend shareholder-legend-grid">
             {series.map((item) => {
-              const stats = changeStats(trend, item.key);
+              const percentageStats = changeStats(trend, item.key);
+              const holderStats = valueStats(trend, item.holderKey);
+              const lotStats = valueStats(
+                trend.map((point) => ({
+                  ...point,
+                  [`${item.sharesKey}_lots`]: finiteValue(point, item.sharesKey) == null ? null : Number(point[item.sharesKey]) / 1000
+                })),
+                `${item.sharesKey}_lots`
+              );
               return (
                 <div className="trend-stat compact" key={item.key}>
                   <span>
                     <i style={{ backgroundColor: item.color }} />
                     {item.label} {text.percentage}
                   </span>
-                  <strong>{percent(stats.latest)}</strong>
-                  <small className={stats.change >= 0 ? "gain" : "loss"}>
-                    {stats.change >= 0 ? "+" : "-"}
-                    {Math.abs(stats.change).toFixed(2)} pct / {stats.changePercent >= 0 ? "+" : ""}
-                    {stats.changePercent.toFixed(2)}%
+                  <strong>{percent(percentageStats.latest)}</strong>
+                  <small className={percentageStats.change >= 0 ? "gain" : "loss"}>
+                    {text.change} {signedNumber(percentageStats.change, 2)} pct / {signedNumber(percentageStats.changePercent, 2)}%
                   </small>
-                  <em>
-                    {text.holders} {number(latest?.[item.holderKey])} / {text.lots} {number(Number(latest?.[item.sharesKey] ?? 0) / 1000)}
-                  </em>
+                  <em>{text.latest} {text.holders} {number(holderStats.latest)} / {text.lots} {number(lotStats.latest)}</em>
+                  <em className={holderStats.change >= 0 ? "gain" : "loss"}>{text.change} {text.holders} {signedNumber(holderStats.change)}</em>
+                  <em className={lotStats.change >= 0 ? "gain" : "loss"}>{text.change} {text.lots} {signedNumber(lotStats.change)}</em>
                 </div>
               );
             })}

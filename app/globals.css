@@ -528,6 +528,8 @@ button:disabled {
   font-size: 12px;
   font-style: normal;
   font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .trend-stat.compact small {
