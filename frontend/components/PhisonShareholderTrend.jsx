@@ -14,6 +14,7 @@ const text = {
   holders: "\u4eba\u6578",
   lots: "\u5f35\u6578",
   percentage: "\u6301\u80a1\u6bd4\u4f8b",
+  under1: "<1 \u5f35",
   latest: "\u6700\u65b0",
   change: "\u5dee\u503c",
   over1: ">1 \u5f35",
@@ -24,6 +25,7 @@ const text = {
 };
 
 const series = [
+  { key: "under_1_lot_percentage", holderKey: "under_1_lot_holders", sharesKey: "under_1_lot_shares", label: text.under1, color: "#2563eb" },
   { key: "over_1_lot_percentage", holderKey: "over_1_lot_holders", sharesKey: "over_1_lot_shares", label: text.over1, color: "#594ff4" },
   { key: "over_10_lot_percentage", holderKey: "over_10_lot_holders", sharesKey: "over_10_lot_shares", label: text.over10, color: "#0f8a4b" },
   { key: "over_100_lot_percentage", holderKey: "over_100_lot_holders", sharesKey: "over_100_lot_shares", label: text.over100, color: "#c46a16" },
