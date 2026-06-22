@@ -560,7 +560,11 @@ button:disabled {
 }
 
 .shareholder-legend-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.shareholder-institutional-stat {
+  border-color: #f0abfc;
 }
 
 .shareholder-exclusive {

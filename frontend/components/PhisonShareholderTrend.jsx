@@ -14,6 +14,8 @@ const text = {
   holders: "\u4eba\u6578",
   lots: "\u5f35\u6578",
   percentage: "\u6301\u80a1\u6bd4\u4f8b",
+  institutional: "\u4e09\u5927\u6cd5\u4eba",
+  holdingLots: "\u6301\u80a1\u5f35\u6578",
   under1: "<1 \u5f35",
   latest: "\u6700\u65b0",
   change: "\u5dee\u503c",
@@ -41,6 +43,13 @@ const series = [
   { key: "over_400_lot_percentage", holderKey: "over_400_lot_holders", sharesKey: "over_400_lot_shares", label: text.over400, color: "#0f766e" },
   { key: "large_percentage", holderKey: "large_holders", sharesKey: "large_shares", label: text.over1000, color: "#111111" }
 ];
+
+const institutionalSeries = {
+  key: "institutional_holding_percentage",
+  sharesKey: "institutional_holding_lots",
+  label: text.institutional,
+  color: "#d946ef"
+};
 
 function number(value, digits = 0) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: digits }).format(Number(value ?? 0));
@@ -190,8 +199,11 @@ export default function PhisonShareholderTrend() {
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
   const scale = useMemo(() => percentageScale(), []);
+  const chartSeries = useMemo(() => [...series, institutionalSeries], []);
   const exclusiveChanges = useMemo(() => exclusiveBucketChanges(trend), [trend]);
   const exclusiveTotal = useMemo(() => exclusiveTotals(exclusiveChanges), [exclusiveChanges]);
+  const institutionalStats = useMemo(() => changeStats(trend, institutionalSeries.key), [trend]);
+  const institutionalLotStats = useMemo(() => valueStats(trend, institutionalSeries.sharesKey), [trend]);
 
   useEffect(() => {
     let active = true;
@@ -252,6 +264,18 @@ export default function PhisonShareholderTrend() {
                 </div>
               );
             })}
+            <div className="trend-stat compact shareholder-institutional-stat">
+              <span>
+                <i style={{ backgroundColor: institutionalSeries.color }} />
+                {text.institutional} {text.percentage}
+              </span>
+              <strong>{percent(institutionalStats.latest)}</strong>
+              <small className={institutionalStats.change >= 0 ? "gain" : "loss"}>
+                {text.change} {signedNumber(institutionalStats.change, 2)} pct / {signedNumber(institutionalStats.changePercent, 2)}%
+              </small>
+              <em>{text.latest} {text.holdingLots} {number(institutionalLotStats.latest)}</em>
+              <em className={institutionalLotStats.change >= 0 ? "gain" : "loss"}>{text.change} {text.lots} {signedNumber(institutionalLotStats.change)}</em>
+            </div>
           </div>
           <svg className="trend-chart shareholder-chart" viewBox="0 0 640 250" role="img" aria-label={text.chartLabel}>
             <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
@@ -261,7 +285,7 @@ export default function PhisonShareholderTrend() {
             <text x="618" y="121" fill="#8b8b8b" fontSize="12" fontWeight="800">50%</text>
             <text x="624" y="244" fill="#8b8b8b" fontSize="12" fontWeight="800">0%</text>
             <g transform="translate(10 10)">
-              {series.map((item) => (
+              {chartSeries.map((item) => (
                 <path d={buildPath(trend, item.key, scale)} fill="none" key={item.key} stroke={item.color} strokeLinecap="round" strokeWidth="4" />
               ))}
             </g>
