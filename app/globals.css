@@ -563,6 +563,63 @@ button:disabled {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.shareholder-exclusive {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.shareholder-exclusive-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shareholder-exclusive-head strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.shareholder-exclusive-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.shareholder-exclusive-table {
+  display: grid;
+  min-width: 680px;
+}
+
+.shareholder-exclusive-row {
+  display: grid;
+  grid-template-columns: 1.3fr repeat(3, minmax(110px, 1fr));
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.shareholder-exclusive-row.heading {
+  border-top: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.shareholder-exclusive-row.total {
+  border-top-color: #d9d7ff;
+  background: var(--panel-soft);
+  margin: 0 -8px -4px;
+  padding: 10px 8px;
+  border-radius: 14px;
+}
+
 .trend-card-top,
 .trend-card-foot {
   display: flex;
@@ -1322,6 +1379,10 @@ td {
 
   .shareholder-body {
     padding: 12px;
+  }
+
+  .shareholder-exclusive {
+    overflow-x: auto;
   }
 
   .trend-legend {

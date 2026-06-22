@@ -17,7 +17,14 @@ const text = {
   under1: "<1 \u5f35",
   latest: "\u6700\u65b0",
   change: "\u5dee\u503c",
+  exclusiveTitle: "\u975e\u91cd\u758a\u7d1a\u8ddd\u8b8a\u5316",
+  range: "\u7d1a\u8ddd",
+  total: "\u5408\u8a08",
   over1: ">1 \u5f35",
+  from1To10: "1-10 \u5f35",
+  from10To100: "10-100 \u5f35",
+  from100To400: "100-400 \u5f35",
+  from400To1000: "400-1000 \u5f35",
   over10: ">10 \u5f35",
   over100: ">100 \u5f35",
   over400: ">400 \u5f35",
@@ -72,6 +79,84 @@ function signedNumber(value, digits = 0) {
   return `${sign}${number(Math.abs(numberValue), digits)}`;
 }
 
+function signedPercent(value) {
+  const numberValue = Number(value ?? 0);
+  const sign = numberValue >= 0 ? "+" : "-";
+  return `${sign}${Math.abs(numberValue).toFixed(2)} pct`;
+}
+
+function metric(point, key) {
+  return Number(point?.[key] ?? 0);
+}
+
+function exclusiveBucketValues(point) {
+  return [
+    {
+      label: text.under1,
+      holders: metric(point, "under_1_lot_holders"),
+      shares: metric(point, "under_1_lot_shares"),
+      percentage: metric(point, "under_1_lot_percentage")
+    },
+    {
+      label: text.from1To10,
+      holders: metric(point, "over_1_lot_holders") - metric(point, "over_10_lot_holders"),
+      shares: metric(point, "over_1_lot_shares") - metric(point, "over_10_lot_shares"),
+      percentage: metric(point, "over_1_lot_percentage") - metric(point, "over_10_lot_percentage")
+    },
+    {
+      label: text.from10To100,
+      holders: metric(point, "over_10_lot_holders") - metric(point, "over_100_lot_holders"),
+      shares: metric(point, "over_10_lot_shares") - metric(point, "over_100_lot_shares"),
+      percentage: metric(point, "over_10_lot_percentage") - metric(point, "over_100_lot_percentage")
+    },
+    {
+      label: text.from100To400,
+      holders: metric(point, "over_100_lot_holders") - metric(point, "over_400_lot_holders"),
+      shares: metric(point, "over_100_lot_shares") - metric(point, "over_400_lot_shares"),
+      percentage: metric(point, "over_100_lot_percentage") - metric(point, "over_400_lot_percentage")
+    },
+    {
+      label: text.from400To1000,
+      holders: metric(point, "over_400_lot_holders") - metric(point, "large_holders"),
+      shares: metric(point, "over_400_lot_shares") - metric(point, "large_shares"),
+      percentage: metric(point, "over_400_lot_percentage") - metric(point, "large_percentage")
+    },
+    {
+      label: text.over1000,
+      holders: metric(point, "large_holders"),
+      shares: metric(point, "large_shares"),
+      percentage: metric(point, "large_percentage")
+    }
+  ];
+}
+
+function exclusiveBucketChanges(points) {
+  const first = points[0];
+  const latest = points.at(-1);
+  const firstBuckets = exclusiveBucketValues(first);
+  const latestBuckets = exclusiveBucketValues(latest);
+  return latestBuckets.map((bucket, index) => {
+    const baseline = firstBuckets[index];
+    return {
+      ...bucket,
+      holderChange: bucket.holders - baseline.holders,
+      lotChange: (bucket.shares - baseline.shares) / 1000,
+      percentageChange: bucket.percentage - baseline.percentage
+    };
+  });
+}
+
+function exclusiveTotals(buckets) {
+  return buckets.reduce(
+    (total, bucket) => ({
+      holderChange: total.holderChange + bucket.holderChange,
+      lotChange: total.lotChange + bucket.lotChange,
+      percentageChange: total.percentageChange + bucket.percentageChange
+    }),
+    { holderChange: 0, lotChange: 0, percentageChange: 0 }
+  );
+}
+
 function scaleForSeries(points, items) {
   const values = points.flatMap((point) => items.map((item) => finiteValue(point, item.key))).filter((value) => value != null);
   if (!values.length) return { min: 0, range: 1 };
@@ -103,6 +188,8 @@ export default function PhisonShareholderTrend() {
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
   const scale = useMemo(() => percentageScale(), []);
+  const exclusiveChanges = useMemo(() => exclusiveBucketChanges(trend), [trend]);
+  const exclusiveTotal = useMemo(() => exclusiveTotals(exclusiveChanges), [exclusiveChanges]);
 
   useEffect(() => {
     let active = true;
@@ -181,6 +268,34 @@ export default function PhisonShareholderTrend() {
             <span>{labelForDate(trend[0]?.snapshot_date)}</span>
             <span>{trend.length} {text.records}</span>
             <span>{labelForDate(trend.at(-1)?.snapshot_date)}</span>
+          </div>
+          <div className="shareholder-exclusive">
+            <div className="shareholder-exclusive-head">
+              <strong>{text.exclusiveTitle}</strong>
+              <span>{trend[0]?.snapshot_date} - {trend.at(-1)?.snapshot_date}</span>
+            </div>
+            <div className="shareholder-exclusive-table">
+              <div className="shareholder-exclusive-row heading">
+                <span>{text.range}</span>
+                <span>{text.percentage}</span>
+                <span>{text.holders}</span>
+                <span>{text.lots}</span>
+              </div>
+              {exclusiveChanges.map((bucket) => (
+                <div className="shareholder-exclusive-row" key={bucket.label}>
+                  <strong>{bucket.label}</strong>
+                  <span className={bucket.percentageChange >= 0 ? "gain" : "loss"}>{signedPercent(bucket.percentageChange)}</span>
+                  <span className={bucket.holderChange >= 0 ? "gain" : "loss"}>{signedNumber(bucket.holderChange)}</span>
+                  <span className={bucket.lotChange >= 0 ? "gain" : "loss"}>{signedNumber(bucket.lotChange)}</span>
+                </div>
+              ))}
+              <div className="shareholder-exclusive-row total">
+                <strong>{text.total}</strong>
+                <span className={exclusiveTotal.percentageChange >= 0 ? "gain" : "loss"}>{signedPercent(exclusiveTotal.percentageChange)}</span>
+                <span className={exclusiveTotal.holderChange >= 0 ? "gain" : "loss"}>{signedNumber(exclusiveTotal.holderChange)}</span>
+                <span className={exclusiveTotal.lotChange >= 0 ? "gain" : "loss"}>{signedNumber(exclusiveTotal.lotChange)}</span>
+              </div>
+            </div>
           </div>
         </div>
       ) : !error ? (
