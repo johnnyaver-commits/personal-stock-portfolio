@@ -14,7 +14,10 @@ const text = {
   holders: "\u4eba\u6578",
   lots: "\u5f35\u6578",
   percentage: "\u6301\u80a1\u6bd4\u4f8b",
-  institutional: "\u4e09\u5927\u6cd5\u4eba",
+  institutional: "\u4e09\u5927\u6cd5\u4eba\u5408\u8a08",
+  foreign: "\u5916\u8cc7",
+  investmentTrust: "\u6295\u4fe1",
+  dealer: "\u81ea\u71df\u5546",
   holdingLots: "\u6301\u80a1\u5f35\u6578",
   under1: "<1 \u5f35",
   latest: "\u6700\u65b0",
@@ -44,12 +47,12 @@ const series = [
   { key: "large_percentage", holderKey: "large_holders", sharesKey: "large_shares", label: text.over1000, color: "#111111" }
 ];
 
-const institutionalSeries = {
-  key: "institutional_holding_percentage",
-  sharesKey: "institutional_holding_lots",
-  label: text.institutional,
-  color: "#d946ef"
-};
+const institutionalSeries = [
+  { key: "foreign_holding_percentage", sharesKey: "foreign_holding_lots", label: text.foreign, color: "#d946ef" },
+  { key: "investment_trust_holding_percentage", sharesKey: "investment_trust_holding_lots", label: text.investmentTrust, color: "#0891b2" },
+  { key: "dealer_holding_percentage", sharesKey: "dealer_holding_lots", label: text.dealer, color: "#f97316" },
+  { key: "institutional_holding_percentage", sharesKey: "institutional_holding_lots", label: text.institutional, color: "#7c3aed" }
+];
 
 function number(value, digits = 0) {
   return new Intl.NumberFormat("zh-TW", { maximumFractionDigits: digits }).format(Number(value ?? 0));
@@ -199,11 +202,9 @@ export default function PhisonShareholderTrend() {
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState("");
   const scale = useMemo(() => percentageScale(), []);
-  const chartSeries = useMemo(() => [...series, institutionalSeries], []);
+  const chartSeries = useMemo(() => [...series, ...institutionalSeries], []);
   const exclusiveChanges = useMemo(() => exclusiveBucketChanges(trend), [trend]);
   const exclusiveTotal = useMemo(() => exclusiveTotals(exclusiveChanges), [exclusiveChanges]);
-  const institutionalStats = useMemo(() => changeStats(trend, institutionalSeries.key), [trend]);
-  const institutionalLotStats = useMemo(() => valueStats(trend, institutionalSeries.sharesKey), [trend]);
 
   useEffect(() => {
     let active = true;
@@ -264,18 +265,24 @@ export default function PhisonShareholderTrend() {
                 </div>
               );
             })}
-            <div className="trend-stat compact shareholder-institutional-stat">
-              <span>
-                <i style={{ backgroundColor: institutionalSeries.color }} />
-                {text.institutional} {text.percentage}
-              </span>
-              <strong>{percent(institutionalStats.latest)}</strong>
-              <small className={institutionalStats.change >= 0 ? "gain" : "loss"}>
-                {text.change} {signedNumber(institutionalStats.change, 2)} pct / {signedNumber(institutionalStats.changePercent, 2)}%
-              </small>
-              <em>{text.latest} {text.holdingLots} {number(institutionalLotStats.latest)}</em>
-              <em className={institutionalLotStats.change >= 0 ? "gain" : "loss"}>{text.change} {text.lots} {signedNumber(institutionalLotStats.change)}</em>
-            </div>
+            {institutionalSeries.map((item) => {
+              const percentageStats = changeStats(trend, item.key);
+              const lotStats = valueStats(trend, item.sharesKey);
+              return (
+                <div className="trend-stat compact shareholder-institutional-stat" key={item.key}>
+                  <span>
+                    <i style={{ backgroundColor: item.color }} />
+                    {item.label} {text.percentage}
+                  </span>
+                  <strong>{percent(percentageStats.latest)}</strong>
+                  <small className={percentageStats.change >= 0 ? "gain" : "loss"}>
+                    {text.change} {signedNumber(percentageStats.change, 2)} pct / {signedNumber(percentageStats.changePercent, 2)}%
+                  </small>
+                  <em>{text.latest} {text.holdingLots} {number(lotStats.latest)}</em>
+                  <em className={lotStats.change >= 0 ? "gain" : "loss"}>{text.change} {text.lots} {signedNumber(lotStats.change)}</em>
+                </div>
+              );
+            })}
           </div>
           <svg className="trend-chart shareholder-chart" viewBox="0 0 640 250" role="img" aria-label={text.chartLabel}>
             <line x1="10" y1="230" x2="630" y2="230" stroke="#e7e7e7" />
