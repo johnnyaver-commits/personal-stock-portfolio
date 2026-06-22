@@ -20,6 +20,8 @@ const text = {
   exclusiveTitle: "\u975e\u91cd\u758a\u7d1a\u8ddd\u8b8a\u5316",
   range: "\u7d1a\u8ddd",
   total: "\u5408\u8a08",
+  latestLots: "\u6700\u65b0\u5f35\u6578",
+  lotChange: "\u5f35\u6578\u5dee",
   over1: ">1 \u5f35",
   from1To10: "1-10 \u5f35",
   from10To100: "10-100 \u5f35",
@@ -279,13 +281,15 @@ export default function PhisonShareholderTrend() {
                 <span>{text.range}</span>
                 <span>{text.percentage}</span>
                 <span>{text.holders}</span>
-                <span>{text.lots}</span>
+                <span>{text.latestLots}</span>
+                <span>{text.lotChange}</span>
               </div>
               {exclusiveChanges.map((bucket) => (
                 <div className="shareholder-exclusive-row" key={bucket.label}>
                   <strong>{bucket.label}</strong>
                   <span className={bucket.percentageChange >= 0 ? "gain" : "loss"}>{signedPercent(bucket.percentageChange)}</span>
                   <span className={bucket.holderChange >= 0 ? "gain" : "loss"}>{signedNumber(bucket.holderChange)}</span>
+                  <span>{number(bucket.shares / 1000)}</span>
                   <span className={bucket.lotChange >= 0 ? "gain" : "loss"}>{signedNumber(bucket.lotChange)}</span>
                 </div>
               ))}
@@ -293,6 +297,7 @@ export default function PhisonShareholderTrend() {
                 <strong>{text.total}</strong>
                 <span className={exclusiveTotal.percentageChange >= 0 ? "gain" : "loss"}>{signedPercent(exclusiveTotal.percentageChange)}</span>
                 <span className={exclusiveTotal.holderChange >= 0 ? "gain" : "loss"}>{signedNumber(exclusiveTotal.holderChange)}</span>
+                <span>{number(metric(trend.at(-1), "total_shares") / 1000)}</span>
                 <span className={exclusiveTotal.lotChange >= 0 ? "gain" : "loss"}>{signedNumber(exclusiveTotal.lotChange)}</span>
               </div>
             </div>
