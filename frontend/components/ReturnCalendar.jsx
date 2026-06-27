@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 const text = {
   title: "\u5831\u916c\u65e5\u66c6",
   monthReturn: "\u5831\u916c",
-  returnRate: "\u5831\u916c\u7387",
   weeklyReturn: "\u9031\u640d\u76ca",
   noData: "\u5c1a\u7121\u5831\u916c\u65e5\u66c6\u8cc7\u6599",
   twd: "\u53f0\u80a1",
@@ -124,7 +123,6 @@ export default function ReturnCalendar({ trends }) {
   );
   const rows = useMemo(() => calendarRows(monthPoints), [monthPoints]);
   const monthReturn = monthPoints.reduce((sum, point) => sum + point.dailyReturn, 0);
-  const monthRate = monthPoints.reduce((sum, point) => sum + point.returnRate, 0);
 
   if (!dailyPoints.length) {
     return (
@@ -162,8 +160,6 @@ export default function ReturnCalendar({ trends }) {
         <div className="return-calendar-summary">
           <span>{text.monthReturn}</span>
           <strong className={monthReturn >= 0 ? "gain" : "loss"}>{compactMoney(monthReturn, mode.currency)}</strong>
-          <span>{text.returnRate}</span>
-          <strong className={monthRate >= 0 ? "gain" : "loss"}>{percent(monthRate)}</strong>
         </div>
       </div>
 
@@ -180,7 +176,6 @@ export default function ReturnCalendar({ trends }) {
                   <>
                     <span>{day.day}</span>
                     <strong>{compactMoney(day.dailyReturn, mode.currency)}</strong>
-                    <em>{percent(day.returnRate)}</em>
                   </>
                 ) : null}
               </div>
@@ -188,7 +183,6 @@ export default function ReturnCalendar({ trends }) {
             <div className={`return-week ${row.weeklyReturn >= 0 ? "positive" : "negative"}`}>
               <span>{row.week}</span>
               <strong>{compactMoney(row.weeklyReturn, mode.currency)}</strong>
-              <em>{percent(row.weeklyRate)}</em>
             </div>
           </div>
         ))}
