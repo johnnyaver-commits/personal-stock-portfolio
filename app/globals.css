@@ -1541,7 +1541,16 @@ td {
     display: grid;
   }
 
+  .return-calendar-controls select {
+    width: 100%;
+  }
+
+  .return-calendar-panel .segmented {
+    width: 100%;
+  }
+
   .return-calendar-summary {
+    grid-template-columns: 1fr 1fr;
     justify-content: stretch;
     text-align: left;
   }
@@ -1551,7 +1560,44 @@ td {
   }
 
   .return-calendar-body {
+    gap: 6px;
+    overflow-x: visible;
     padding: 12px;
+  }
+
+  .return-calendar-weekdays,
+  .return-calendar-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(62px, 0.78fr);
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .return-calendar-weekdays span {
+    font-size: 12px;
+  }
+
+  .return-day,
+  .return-week {
+    min-height: 70px;
+    border-radius: 10px;
+    padding: 18px 4px 6px;
+  }
+
+  .return-day span,
+  .return-week span {
+    top: 5px;
+    right: 6px;
+    font-size: 13px;
+  }
+
+  .return-day strong,
+  .return-week strong {
+    font-size: clamp(11px, 2.9vw, 14px);
+  }
+
+  .return-day em,
+  .return-week em {
+    font-size: clamp(10px, 2.6vw, 12px);
   }
 
   .trend-legend {
