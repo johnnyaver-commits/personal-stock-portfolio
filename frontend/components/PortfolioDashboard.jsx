@@ -5,6 +5,7 @@ import Header from "@/frontend/components/Header";
 import HoldingsTable from "@/frontend/components/HoldingsTable";
 import PriceChart from "@/frontend/components/PriceChart";
 import PhisonShareholderTrend from "@/frontend/components/PhisonShareholderTrend";
+import ReturnCalendar from "@/frontend/components/ReturnCalendar";
 import TradeForm from "@/frontend/components/TradeForm";
 import TrendChart from "@/frontend/components/TrendChart";
 import WeeklyAnalysis from "@/frontend/components/WeeklyAnalysis";
@@ -215,6 +216,7 @@ export default function PortfolioDashboard() {
         {error ? <p className="status error">{error}</p> : null}
         <WeeklyAnalysis analysis={weeklyAnalysis} loading={analysisLoading} onGenerate={handleGenerateAnalysis} />
         <PhisonShareholderTrend />
+        <ReturnCalendar trends={trends} />
         <TrendChart loading={trendLoading} trends={trends} />
         <section className="content-grid">
           <HoldingsTable
