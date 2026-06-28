@@ -44,6 +44,10 @@ function weekdayIndex(value) {
   return dayIndex - 1;
 }
 
+function isWeekday(value) {
+  return weekdayIndex(value) >= 0;
+}
+
 function weekOfMonth(value) {
   const { year, month, day } = localDateParts(value);
   const first = new Date(Date.UTC(year, month - 1, 1));
@@ -65,31 +69,27 @@ function compactMoney(value, currency) {
   return `${number >= 0 ? "+" : "-"}${money(Math.abs(number), currency)}`;
 }
 
-function percent(value) {
-  const number = Number(value ?? 0);
-  return `${number >= 0 ? "+" : ""}${number.toFixed(2)}%`;
-}
+function buildCalendarPoints(points, mode, activeMonth) {
+  const visiblePoints = [...points]
+    .sort((a, b) => String(a.snapshot_date).localeCompare(String(b.snapshot_date)))
+    .filter((point) => isWeekday(point.snapshot_date));
 
-function buildCalendarPoints(points, mode) {
-  return points.map((point, index) => {
-    const previous = points[index - 1];
+  return visiblePoints.map((point, index) => {
+    const previous = visiblePoints[index - 1];
     const dailyReturn = previous ? Number(point[mode.pnlKey] ?? 0) - Number(previous[mode.pnlKey] ?? 0) : 0;
-    const previousCost = Number(previous?.[mode.costKey] ?? point[mode.costKey] ?? 0);
     return {
       date: point.snapshot_date,
       day: localDateParts(point.snapshot_date).day,
-      dailyReturn,
-      returnRate: previousCost === 0 ? 0 : (dailyReturn / Math.abs(previousCost)) * 100
+      dailyReturn
     };
-  });
+  }).filter((point) => monthKey(point.date) === activeMonth);
 }
 
 function calendarRows(points) {
   const rows = Array.from({ length: 6 }, (_, index) => ({
     week: index + 1,
     days: Array(5).fill(null),
-    weeklyReturn: 0,
-    weeklyRate: 0
+    weeklyReturn: 0
   }));
 
   for (const point of points) {
@@ -99,12 +99,6 @@ function calendarRows(points) {
     if (!row) continue;
     row.days[column] = point;
     row.weeklyReturn += point.dailyReturn;
-  }
-
-  for (const row of rows) {
-    const activeDays = row.days.filter(Boolean);
-    const first = activeDays[0];
-    row.weeklyRate = first ? activeDays.reduce((sum, day) => sum + day.returnRate, 0) : 0;
   }
 
   return rows.filter((row) => row.days.some(Boolean));
@@ -118,7 +112,7 @@ export default function ReturnCalendar({ trends }) {
   const [selectedMonth, setSelectedMonth] = useState("");
   const activeMonth = selectedMonth || months.at(-1) || "";
   const monthPoints = useMemo(
-    () => buildCalendarPoints(dailyPoints.filter((point) => monthKey(point.snapshot_date) === activeMonth), mode),
+    () => buildCalendarPoints(dailyPoints, mode, activeMonth),
     [activeMonth, dailyPoints, mode]
   );
   const rows = useMemo(() => calendarRows(monthPoints), [monthPoints]);
