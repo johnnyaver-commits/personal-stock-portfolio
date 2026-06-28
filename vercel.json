@@ -5,6 +5,10 @@
   "installCommand": "npm ci",
   "crons": [
     {
+      "path": "/api/cron/daily-snapshot",
+      "schedule": "30 8 * * 1-5"
+    },
+    {
       "path": "/api/cron/weekly-analysis",
       "schedule": "0 1 * * 6"
     }
