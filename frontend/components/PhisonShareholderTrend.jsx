@@ -145,7 +145,7 @@ function exclusiveBucketValues(point) {
 }
 
 function exclusiveBucketChanges(points) {
-  const first = points[0];
+  const first = points.at(-2) ?? points[0];
   const latest = points.at(-1);
   const firstBuckets = exclusiveBucketValues(first);
   const latestBuckets = exclusiveBucketValues(latest);
@@ -205,6 +205,8 @@ export default function PhisonShareholderTrend() {
   const chartSeries = useMemo(() => [...series, ...institutionalSeries], []);
   const exclusiveChanges = useMemo(() => exclusiveBucketChanges(trend), [trend]);
   const exclusiveTotal = useMemo(() => exclusiveTotals(exclusiveChanges), [exclusiveChanges]);
+  const exclusiveBaseline = trend.at(-2) ?? trend[0];
+  const exclusiveLatest = trend.at(-1);
 
   useEffect(() => {
     let active = true;
@@ -305,7 +307,7 @@ export default function PhisonShareholderTrend() {
           <div className="shareholder-exclusive">
             <div className="shareholder-exclusive-head">
               <strong>{text.exclusiveTitle}</strong>
-              <span>{trend[0]?.snapshot_date} - {trend.at(-1)?.snapshot_date}</span>
+              <span>{exclusiveBaseline?.snapshot_date} - {exclusiveLatest?.snapshot_date}</span>
             </div>
             <div className="shareholder-exclusive-table">
               <div className="shareholder-exclusive-row heading">
