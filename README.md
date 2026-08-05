@@ -26,8 +26,9 @@ Deploy with Vercel. Configure Neon Postgres environment variables and the login 
 
 ## Evening investment infographic
 
-The `/api/cron/evening-report` job performs the production pipeline after the
-Taiwan market close:
+The `/api/cron/evening-report` job runs every Friday at `12:00 UTC`, which is
+`20:00` in Asia/Taipei, and performs the production pipeline after the Taiwan
+market close:
 
 1. Fetch 009826, VT, QQQ, 0050, 006208 and market quote data.
 2. Generate a Traditional Chinese report with current AI/semiconductor news.
@@ -48,7 +49,7 @@ Optional model overrides: `OPENAI_TEXT_MODEL`, `OPENAI_IMAGE_MODEL`, and
 
 ## Morning market infographic
 
-The `/api/cron/morning-report` job runs every day at `00:00 UTC`, which is
+The `/api/cron/morning-report` job runs every Monday at `00:00 UTC`, which is
 `08:00` in Asia/Taipei. It fetches the four major US indices, eight technology
 stocks, Brent crude oil, the US 10-year Treasury yield, DXY and other market
 indicators. OpenAI web search verifies the latest completed Taiwan index

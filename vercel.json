@@ -6,11 +6,11 @@
   "crons": [
     {
       "path": "/api/cron/morning-report",
-      "schedule": "0 0 * * *"
+      "schedule": "0 0 * * 1"
     },
     {
       "path": "/api/cron/evening-report",
-      "schedule": "0 10 * * *"
+      "schedule": "0 12 * * 5"
     },
     {
       "path": "/api/cron/daily-snapshot",
