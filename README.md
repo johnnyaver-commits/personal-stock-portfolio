@@ -60,4 +60,6 @@ The morning job uses the same required and optional environment variables as
 the evening infographic job. Its LINE retry key is stable per Taipei calendar
 date, so retries do not create duplicate morning images. If LINE rejects a
 push, the endpoint returns HTTP 502 while preserving the uploaded image and
-preview URLs in the JSON response for diagnosis or manual delivery.
+preview URLs in the JSON response for diagnosis or manual delivery. Before
+calling OpenAI, the job checks LINE's monthly quota and skips paid generation
+when the quota is already exhausted.
