@@ -1,0 +1,50 @@
+name: LINE Investment Reports
+
+on:
+  schedule:
+    # Taiwan 08:00 = UTC 00:00
+    - cron: "0 0 * * *"
+    # Taiwan 17:00 = UTC 09:00
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      report:
+        description: "Report to send"
+        required: true
+        default: "morning"
+        type: choice
+        options:
+          - morning
+          - evening
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Select report endpoint
+        id: select
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            REPORT="${{ inputs.report }}"
+          elif [[ "${{ github.event.schedule }}" == "0 0 * * *" ]]; then
+            REPORT="morning"
+          else
+            REPORT="evening"
+          fi
+          echo "report=$REPORT" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Vercel report push
+        env:
+          BASE_URL: ${{ secrets.VERCEL_BASE_URL }}
+          PUSH_SECRET: ${{ secrets.PUSH_API_SECRET }}
+          REPORT: ${{ steps.select.outputs.report }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${BASE_URL:-https://sdd-md-github-vercel-johnnyaver-gma.vercel.app}"
+          RESPONSE=$(curl --fail-with-body --retry 3 --retry-delay 10 \
+            -H "Authorization: Bearer ${PUSH_SECRET}" \
+            "${BASE_URL}/api/cron/${REPORT}-report")
+          echo "$RESPONSE"
