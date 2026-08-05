@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { pushLineMessages, reportImageUrls } from "@/lib/line-push";
 
 function authorized(request) {
-  const secret = process.env.PUSH_API_SECRET;
   const auth = request.headers.get("authorization");
   const custom = request.headers.get("x-push-secret");
-  return Boolean(secret && (auth === `Bearer ${secret}` || custom === secret));
+  const allowedSecrets = [process.env.CRON_SECRET, process.env.PUSH_API_SECRET].filter(Boolean);
+  return allowedSecrets.some(
+    (secret) => auth === `Bearer ${secret}` || custom === secret,
+  );
 }
 
 export async function GET(request) {
