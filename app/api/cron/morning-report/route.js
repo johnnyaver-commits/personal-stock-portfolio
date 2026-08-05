@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { pushLineMessages, reportImageUrls } from "@/lib/line-push";
+import { runMorningReportPipeline } from "@/lib/morning-report-pipeline";
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
 
 function authorized(request) {
   const auth = request.headers.get("authorization");
@@ -16,12 +19,17 @@ export async function GET(request) {
   }
 
   try {
-    const images = reportImageUrls("/api/reports/morning");
-    await pushLineMessages([
-      { type: "image", ...images },
-      { type: "text", text: "☀️ 老爸早安股市快報已更新\n掌握美股、科技股與今日台股觀察。" },
-    ]);
-    return NextResponse.json({ ok: true, report: "morning", ...images });
+    const startedAt = Date.now();
+    const result = await runMorningReportPipeline();
+    return NextResponse.json({
+      ok: true,
+      report: "morning",
+      reportDate: result.report.reportDate,
+      imageUrl: result.urls.originalContentUrl,
+      previewUrl: result.urls.previewImageUrl,
+      line: result.line,
+      elapsedMs: Date.now() - startedAt,
+    });
   } catch (error) {
     console.error("Morning report push failed", error);
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
