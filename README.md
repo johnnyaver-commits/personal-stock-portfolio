@@ -45,3 +45,17 @@ Required Vercel environment variables:
 
 Optional model overrides: `OPENAI_TEXT_MODEL`, `OPENAI_IMAGE_MODEL`, and
 `OPENAI_IMAGE_QUALITY`.
+
+## Morning market infographic
+
+The `/api/cron/morning-report` job runs every day at `00:00 UTC`, which is
+`08:00` in Asia/Taipei. It fetches the four major US indices, eight technology
+stocks, Brent crude oil, the US 10-year Treasury yield, DXY and other market
+indicators. OpenAI web search verifies the latest completed Taiwan index
+futures night session and writes the Taiwan-market observations. The job then
+generates a 2160×3840 Traditional Chinese infographic, uploads LINE-compatible
+JPEGs to Vercel Blob, and pushes one image to the configured LINE group.
+
+The morning job uses the same required and optional environment variables as
+the evening infographic job. Its LINE retry key is stable per Taipei calendar
+date, so retries do not create duplicate morning images.
