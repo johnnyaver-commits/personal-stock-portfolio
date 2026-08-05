@@ -58,4 +58,6 @@ JPEGs to Vercel Blob, and pushes one image to the configured LINE group.
 
 The morning job uses the same required and optional environment variables as
 the evening infographic job. Its LINE retry key is stable per Taipei calendar
-date, so retries do not create duplicate morning images.
+date, so retries do not create duplicate morning images. If LINE rejects a
+push, the endpoint returns HTTP 502 while preserving the uploaded image and
+preview URLs in the JSON response for diagnosis or manual delivery.

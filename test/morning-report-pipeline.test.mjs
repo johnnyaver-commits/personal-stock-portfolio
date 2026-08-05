@@ -15,9 +15,10 @@ test("morning market data preserves required sections", () => {
     macro: [{ label: "美元指數", price: 98.39, changePercent: -0.13 }],
     sentiment: "偏多",
   });
-  assert.equal(data.usIndices[0].price, 44193.12);
+  assert.equal(data.usIndices[0].priceText, "44,193.12");
   assert.equal(data.technologyStocks[0].label, "NVIDIA");
-  assert.equal(data.commoditiesAndIndicators[0].changePercent, -0.13);
+  assert.equal(data.technologyStocks[0].changePercentText, "+1.21%");
+  assert.equal(data.commoditiesAndIndicators[0].changePercentText, "-0.13%");
 });
 
 test("morning report prompt requires all requested markets and source discipline", () => {
