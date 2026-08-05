@@ -21,15 +21,16 @@ export async function GET(request) {
   try {
     const startedAt = Date.now();
     const result = await runMorningReportPipeline();
+    const pushed = result.line.ok !== false;
     return NextResponse.json({
-      ok: true,
+      ok: pushed,
       report: "morning",
       reportDate: result.report.reportDate,
       imageUrl: result.urls.originalContentUrl,
       previewUrl: result.urls.previewImageUrl,
       line: result.line,
       elapsedMs: Date.now() - startedAt,
-    });
+    }, { status: pushed ? 200 : 502 });
   } catch (error) {
     console.error("Morning report push failed", error);
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
