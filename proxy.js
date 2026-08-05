@@ -15,6 +15,8 @@ function isPublicPath(pathname) {
     pathname === "/api/login" ||
     pathname === "/api/cron/daily-snapshot" ||
     pathname === "/api/cron/weekly-analysis" ||
+    pathname === "/api/line/webhook" ||
+    pathname === "/api/line/push" ||
     pathname.startsWith("/_next/") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
