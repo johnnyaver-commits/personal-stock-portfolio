@@ -13,9 +13,12 @@ function verifySignature(rawBody, signature, secret) {
 
 async function replyMessage(replyToken, text) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  if (!token || !replyToken) return;
+  if (!token || !replyToken) {
+    console.error("LINE reply skipped: missing access token or reply token");
+    return { ok: false, reason: "missing-token" };
+  }
 
-  await fetch(LINE_REPLY_URL, {
+  const response = await fetch(LINE_REPLY_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -26,6 +29,15 @@ async function replyMessage(replyToken, text) {
       messages: [{ type: "text", text }],
     }),
   });
+
+  const details = await response.text();
+  if (!response.ok) {
+    console.error("LINE reply failed", response.status, details);
+    return { ok: false, status: response.status, details };
+  }
+
+  console.log("LINE reply success");
+  return { ok: true };
 }
 
 export async function GET() {
@@ -38,6 +50,10 @@ export async function POST(request) {
   const secret = process.env.LINE_CHANNEL_SECRET;
 
   if (!verifySignature(rawBody, signature, secret)) {
+    console.error("LINE webhook rejected: invalid signature", {
+      hasSignature: Boolean(signature),
+      hasSecret: Boolean(secret),
+    });
     return NextResponse.json({ ok: false, error: "Invalid signature" }, { status: 401 });
   }
 
@@ -45,13 +61,27 @@ export async function POST(request) {
   try {
     payload = JSON.parse(rawBody);
   } catch {
+    console.error("LINE webhook rejected: invalid JSON");
     return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
   }
+
+  console.log("LINE webhook received", {
+    eventCount: payload.events?.length || 0,
+    eventTypes: (payload.events || []).map((event) => event.type),
+    sourceTypes: (payload.events || []).map((event) => event.source?.type),
+  });
 
   for (const event of payload.events || []) {
     const source = event.source || {};
     const groupId = source.groupId;
     const text = event.message?.type === "text" ? event.message.text.trim() : "";
+
+    console.log("LINE event", {
+      type: event.type,
+      sourceType: source.type,
+      hasGroupId: Boolean(groupId),
+      text,
+    });
 
     if (groupId && ["綁定", "綁定早報", "groupid", "group id"].includes(text.toLowerCase())) {
       await replyMessage(
