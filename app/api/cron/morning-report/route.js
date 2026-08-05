@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pushLineMessages, reportImageUrl } from "@/lib/line-push";
+import { pushLineMessages, reportImageUrls } from "@/lib/line-push";
 
 function authorized(request) {
   const secret = process.env.PUSH_API_SECRET;
@@ -14,12 +14,12 @@ export async function GET(request) {
   }
 
   try {
-    const imageUrl = reportImageUrl("/api/reports/morning");
+    const images = reportImageUrls("/api/reports/morning");
     await pushLineMessages([
-      { type: "image", originalContentUrl: imageUrl, previewImageUrl: imageUrl },
+      { type: "image", ...images },
       { type: "text", text: "☀️ 老爸早安股市快報已更新\n掌握美股、科技股與今日台股觀察。" },
     ]);
-    return NextResponse.json({ ok: true, report: "morning", imageUrl });
+    return NextResponse.json({ ok: true, report: "morning", ...images });
   } catch (error) {
     console.error("Morning report push failed", error);
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
