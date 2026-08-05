@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { pushLineMessages, reportImageUrls } from "@/lib/line-push";
+import { runEveningReportPipeline } from "@/lib/evening-report-pipeline";
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
 
 function authorized(request) {
   const auth = request.headers.get("authorization");
@@ -16,12 +19,17 @@ export async function GET(request) {
   }
 
   try {
-    const images = reportImageUrls("/api/reports/evening");
-    await pushLineMessages([
-      { type: "image", ...images },
-      { type: "text", text: "📊 每日 AI 投資日報已更新\n包含 009826、ETF 比較與長期投資觀察。" },
-    ]);
-    return NextResponse.json({ ok: true, report: "evening", ...images });
+    const startedAt = Date.now();
+    const result = await runEveningReportPipeline();
+    return NextResponse.json({
+      ok: true,
+      report: "evening",
+      reportDate: result.report.reportDate,
+      imageUrl: result.urls.originalContentUrl,
+      previewUrl: result.urls.previewImageUrl,
+      line: result.line,
+      elapsedMs: Date.now() - startedAt,
+    });
   } catch (error) {
     console.error("Evening report push failed", error);
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
