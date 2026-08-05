@@ -1,11 +1,6 @@
-name: LINE Investment Reports
+name: LINE Investment Reports (Manual Test)
 
 on:
-  schedule:
-    # Taiwan 08:00 = UTC 00:00
-    - cron: "0 0 * * *"
-    # Taiwan 17:15 = UTC 09:15
-    - cron: "15 9 * * *"
   workflow_dispatch:
     inputs:
       report:
@@ -22,24 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Select report endpoint
-        id: select
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            REPORT="${{ inputs.report }}"
-          elif [[ "${{ github.event.schedule }}" == "0 0 * * *" ]]; then
-            REPORT="morning"
-          else
-            REPORT="evening"
-          fi
-          echo "report=$REPORT" >> "$GITHUB_OUTPUT"
-
       - name: Trigger Vercel report push
         env:
           BASE_URL: ${{ secrets.VERCEL_BASE_URL }}
           PUSH_SECRET: ${{ secrets.PUSH_API_SECRET }}
-          REPORT: ${{ steps.select.outputs.report }}
+          REPORT: ${{ inputs.report }}
         shell: bash
         run: |
           set -euo pipefail
