@@ -4,8 +4,8 @@ on:
   schedule:
     # Taiwan 08:00 = UTC 00:00
     - cron: "0 0 * * *"
-    # Taiwan 17:00 = UTC 09:00
-    - cron: "0 9 * * *"
+    # Taiwan 17:15 = UTC 09:15
+    - cron: "15 9 * * *"
   workflow_dispatch:
     inputs:
       report:
