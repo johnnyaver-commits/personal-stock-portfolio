@@ -16,6 +16,9 @@ function isPublicPath(pathname) {
     pathname === "/api/cron/daily-snapshot" ||
     pathname === "/api/cron/weekly-analysis" ||
     pathname.startsWith("/api/line/") ||
+    pathname.startsWith("/api/reports/") ||
+    pathname.startsWith("/api/cron/morning-report") ||
+    pathname.startsWith("/api/cron/evening-report") ||
     pathname.startsWith("/_next/") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
