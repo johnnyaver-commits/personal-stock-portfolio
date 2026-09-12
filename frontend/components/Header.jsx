@@ -8,14 +8,15 @@ export default function Header({ lastUpdated, onRefresh, refreshing }) {
           <div className="brand-mark">
             <Activity size={22} aria-hidden="true" />
           </div>
-          <div>
-            <h1>家庭股票庫存</h1>
-            <p>整合多人持股，保留每位家人的獨立庫存與損益。</p>
+          <div className="brand-copy">
+            <span className="brand-kicker">PRIVATE WEALTH</span>
+            <h1>家庭資產儀表板</h1>
+            <p>投資組合、績效與市場資料集中管理</p>
           </div>
         </div>
         <div className="header-meta">
-          <span>更新：{lastUpdated || "尚未更新"}</span>
-          <button className="button" type="button" onClick={onRefresh} disabled={refreshing}>
+          <span className="market-status"><i />資料更新：{lastUpdated || "尚未更新"}</span>
+          <button className="button header-refresh" type="button" onClick={onRefresh} disabled={refreshing}>
             <RefreshCw size={16} aria-hidden="true" />
             {refreshing ? "更新中" : "更新報價"}
           </button>

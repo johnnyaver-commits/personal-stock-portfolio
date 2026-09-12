@@ -19,6 +19,11 @@ function formatMoney(value, currency) {
   }).format(Number(value ?? 0));
 }
 
+function formatPercent(value) {
+  const number = Number(value ?? 0);
+  return `${number >= 0 ? "+" : ""}${number.toFixed(2)}%`;
+}
+
 function OwnerFilter({ owners, selectedOwnerId, onChange }) {
   return (
     <section className="owner-filter" aria-label="持有人篩選">
@@ -182,35 +187,53 @@ export default function PortfolioDashboard() {
     <div className="app-shell">
       <Header lastUpdated={lastUpdated} onRefresh={() => refresh()} refreshing={loading || trendLoading} />
       <main className="main">
+        <section className="dashboard-intro">
+          <div>
+            <span className="eyebrow">PORTFOLIO OVERVIEW</span>
+            <h2>投資組合總覽</h2>
+            <p>即時掌握家庭成員的資產配置、成本與未實現損益。</p>
+          </div>
+          <div className="dashboard-asof">
+            <span>目前檢視</span>
+            <strong>{viewName}</strong>
+          </div>
+        </section>
         <OwnerFilter owners={owners} selectedOwnerId={selectedOwnerId} onChange={setSelectedOwnerId} />
         <section className="summary-grid" id="overview">
-          <div className="metric primary">
-            <span>{viewName}</span>
+          <div className="metric primary metric-overview">
+            <span>追蹤部位</span>
             <strong>{filteredHoldings.length} 筆庫存</strong>
+            <small>LIVE PORTFOLIO</small>
           </div>
-          <div className="metric">
+          <div className="metric market-twd">
             <span>台股現值</span>
             <strong>{formatMoney(summary.TWD.marketValue, "TWD")}</strong>
+            <small>MARKET VALUE</small>
           </div>
-          <div className="metric">
+          <div className="metric market-twd">
             <span>台股付出成本</span>
             <strong>{formatMoney(summary.TWD.costBasis, "TWD")}</strong>
+            <small>COST BASIS</small>
           </div>
-          <div className="metric">
+          <div className="metric market-twd metric-pnl">
             <span>台股未實現損益</span>
             <strong className={summary.TWD.pnl >= 0 ? "gain" : "loss"}>{formatMoney(summary.TWD.pnl, "TWD")}</strong>
+            <small>{formatPercent(summary.TWD.costBasis ? (summary.TWD.pnl / summary.TWD.costBasis) * 100 : 0)} VS COST</small>
           </div>
-          <div className="metric">
+          <div className="metric market-usd">
             <span>美股現值</span>
             <strong>{formatMoney(summary.USD.marketValue, "USD")}</strong>
+            <small>MARKET VALUE</small>
           </div>
-          <div className="metric">
+          <div className="metric market-usd">
             <span>美股付出成本</span>
             <strong>{formatMoney(summary.USD.costBasis, "USD")}</strong>
+            <small>COST BASIS</small>
           </div>
-          <div className="metric">
+          <div className="metric market-usd metric-pnl">
             <span>美股未實現損益</span>
             <strong className={summary.USD.pnl >= 0 ? "gain" : "loss"}>{formatMoney(summary.USD.pnl, "USD")}</strong>
+            <small>{formatPercent(summary.USD.costBasis ? (summary.USD.pnl / summary.USD.costBasis) * 100 : 0)} VS COST</small>
           </div>
         </section>
         {error ? <p className="status error">{error}</p> : null}
