@@ -1732,13 +1732,43 @@ td {
     gap: 10px;
   }
 
+  .monthly-return-scroll {
+    overflow-x: visible;
+  }
+
   .monthly-return-bars {
-    gap: 8px;
-    min-width: 460px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .monthly-return-column {
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .monthly-return-column > strong {
+    overflow: hidden;
+    min-height: 14px;
+    font-size: clamp(9px, 2.55vw, 11px);
+    letter-spacing: -0.04em;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .monthly-return-column > span {
+    font-size: clamp(9px, 2.55vw, 11px);
   }
 
   .monthly-return-track {
-    height: 150px;
+    height: 132px;
+    border-radius: 8px;
+  }
+
+  .monthly-return-bar {
+    right: 20%;
+    left: 20%;
+    border-radius: 6px 6px 2px 2px;
   }
 
   .trend-legend {

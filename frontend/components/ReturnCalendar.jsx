@@ -72,6 +72,26 @@ function compactMoney(value, currency) {
   return `${number >= 0 ? "+" : "-"}${money(Math.abs(number), currency)}`;
 }
 
+function chartMoney(value, currency) {
+  const number = Number(value ?? 0);
+  const sign = number >= 0 ? "+" : "-";
+  const absolute = Math.abs(number);
+
+  if (currency === "TWD") {
+    if (absolute >= 100_000_000) return `${sign}${(absolute / 100_000_000).toFixed(1)}\u5104`;
+    if (absolute >= 10_000) return `${sign}${(absolute / 10_000).toFixed(1)}\u842c`;
+    return `${sign}${Math.round(absolute).toLocaleString("zh-TW")}`;
+  }
+
+  if (absolute >= 1_000_000) return `${sign}$${(absolute / 1_000_000).toFixed(1)}M`;
+  if (absolute >= 1_000) return `${sign}$${(absolute / 1_000).toFixed(1)}K`;
+  return `${sign}$${Math.round(absolute).toLocaleString("en-US")}`;
+}
+
+function chartMonth(value) {
+  return String(value ?? "").slice(2).replace("-", "/");
+}
+
 function buildCalendarPoints(points, mode, activeMonth) {
   const visiblePoints = [...points]
     .sort((a, b) => String(a.snapshot_date).localeCompare(String(b.snapshot_date)))
@@ -131,7 +151,7 @@ function MonthlyReturnChart({ items, mode }) {
             return (
               <div className="monthly-return-column" key={item.month}>
                 <strong className={tone === "positive" ? "gain" : tone === "negative" ? "loss" : ""}>
-                  {compactMoney(item.value, mode.currency)}
+                  {chartMoney(item.value, mode.currency)}
                 </strong>
                 <div className="monthly-return-track">
                   <span className="monthly-return-zero" />
@@ -142,7 +162,7 @@ function MonthlyReturnChart({ items, mode }) {
                     style={{ height: `${height}%` }}
                   />
                 </div>
-                <span>{item.month.replace("-", "/")}</span>
+                <span>{chartMonth(item.month)}</span>
               </div>
             );
           })}
