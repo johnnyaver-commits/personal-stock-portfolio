@@ -24,6 +24,18 @@ test("monthly chart calculates P&L changes by month", () => {
   ]);
 });
 
+test("first visible month uses its daily changes instead of showing a zero baseline", () => {
+  const points = [
+    point("2026-06-05", 100_000),
+    point("2026-06-08", -312_000),
+    point("2026-06-30", 384_000)
+  ];
+
+  assert.deepEqual(calculateMonthlyPnlChanges(points, pnlKey), [
+    { month: "2026-06", value: 284_000 }
+  ]);
+});
+
 test("monthly chart keeps at most six months and sorts its input", () => {
   const points = [
     point("2026-09-01", 70),

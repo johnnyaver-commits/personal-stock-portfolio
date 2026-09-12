@@ -176,7 +176,6 @@ export default function ReturnCalendar({ trends }) {
   const [modeKey, setModeKey] = useState("TWD");
   const mode = marketModes[modeKey];
   const dailyPoints = useMemo(() => trends?.daily ?? [], [trends]);
-  const monthlyPoints = useMemo(() => trends?.monthly ?? [], [trends]);
   const months = useMemo(() => [...new Set(dailyPoints.map((point) => monthKey(point.snapshot_date)))].filter(Boolean), [dailyPoints]);
   const [selectedMonth, setSelectedMonth] = useState("");
   const activeMonth = selectedMonth || months.at(-1) || "";
@@ -186,8 +185,8 @@ export default function ReturnCalendar({ trends }) {
   );
   const rows = useMemo(() => calendarRows(monthPoints), [monthPoints]);
   const monthlyReturns = useMemo(
-    () => calculateMonthlyPnlChanges(monthlyPoints, mode.pnlKey, 6),
-    [monthlyPoints, mode]
+    () => calculateMonthlyPnlChanges(dailyPoints.filter((point) => isWeekday(point.snapshot_date)), mode.pnlKey, 6),
+    [dailyPoints, mode]
   );
   const monthReturn = monthPoints.reduce((sum, point) => sum + point.dailyReturn, 0);
 
