@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { calculateMonthlyPnlChanges } from "@/lib/monthlyReturns";
 
 const text = {
   title: "\u5831\u916c\u65e5\u66c6",
   monthReturn: "\u5831\u916c",
+  monthlyPnl: "\u8fd1 6 \u500b\u6708\u640d\u76ca",
+  monthlyPnlDescription: "\u6bcf\u6708\u672a\u5be6\u73fe\u640d\u76ca\u8b8a\u5316",
   weeklyReturn: "\u9031\u640d\u76ca",
   noData: "\u5c1a\u7121\u5831\u916c\u65e5\u66c6\u8cc7\u6599",
   twd: "\u53f0\u80a1",
@@ -104,10 +107,56 @@ function calendarRows(points) {
   return rows.filter((row) => row.days.some(Boolean));
 }
 
+function MonthlyReturnChart({ items, mode }) {
+  const maxValue = Math.max(...items.map((item) => Math.abs(item.value)), 1);
+
+  return (
+    <section className="monthly-return-chart" aria-label={`${mode.label}${text.monthlyPnl}`}>
+      <div className="monthly-return-chart-header">
+        <div>
+          <h3>{text.monthlyPnl}</h3>
+          <p>{mode.label}・{text.monthlyPnlDescription}</p>
+        </div>
+        <div className="monthly-return-legend" aria-hidden="true">
+          <span><i className="positive" />獲利</span>
+          <span><i className="negative" />虧損</span>
+        </div>
+      </div>
+
+      <div className="monthly-return-scroll">
+        <div className="monthly-return-bars">
+          {items.map((item) => {
+            const tone = item.value > 0 ? "positive" : item.value < 0 ? "negative" : "neutral";
+            const height = item.value === 0 ? 2 : Math.max(5, (Math.abs(item.value) / maxValue) * 46);
+            return (
+              <div className="monthly-return-column" key={item.month}>
+                <strong className={tone === "positive" ? "gain" : tone === "negative" ? "loss" : ""}>
+                  {compactMoney(item.value, mode.currency)}
+                </strong>
+                <div className="monthly-return-track">
+                  <span className="monthly-return-zero" />
+                  <span
+                    aria-label={`${item.month.replace("-", "/")} ${compactMoney(item.value, mode.currency)}`}
+                    className={`monthly-return-bar ${tone}`}
+                    role="img"
+                    style={{ height: `${height}%` }}
+                  />
+                </div>
+                <span>{item.month.replace("-", "/")}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function ReturnCalendar({ trends }) {
   const [modeKey, setModeKey] = useState("TWD");
   const mode = marketModes[modeKey];
   const dailyPoints = useMemo(() => trends?.daily ?? [], [trends]);
+  const monthlyPoints = useMemo(() => trends?.monthly ?? [], [trends]);
   const months = useMemo(() => [...new Set(dailyPoints.map((point) => monthKey(point.snapshot_date)))].filter(Boolean), [dailyPoints]);
   const [selectedMonth, setSelectedMonth] = useState("");
   const activeMonth = selectedMonth || months.at(-1) || "";
@@ -116,6 +165,10 @@ export default function ReturnCalendar({ trends }) {
     [activeMonth, dailyPoints, mode]
   );
   const rows = useMemo(() => calendarRows(monthPoints), [monthPoints]);
+  const monthlyReturns = useMemo(
+    () => calculateMonthlyPnlChanges(monthlyPoints, mode.pnlKey, 6),
+    [monthlyPoints, mode]
+  );
   const monthReturn = monthPoints.reduce((sum, point) => sum + point.dailyReturn, 0);
 
   if (!dailyPoints.length) {
@@ -181,6 +234,7 @@ export default function ReturnCalendar({ trends }) {
           </div>
         ))}
       </div>
+      {monthlyReturns.length ? <MonthlyReturnChart items={monthlyReturns} mode={mode} /> : null}
     </section>
   );
 }

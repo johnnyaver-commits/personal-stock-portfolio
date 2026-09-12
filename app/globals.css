@@ -771,6 +771,129 @@ button:disabled {
   font-weight: 800;
 }
 
+.monthly-return-chart {
+  border-top: 1px solid #303030;
+  padding: 22px 20px 24px;
+}
+
+.monthly-return-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.monthly-return-chart h3 {
+  margin: 0;
+  color: #f4f4f5;
+  font-size: 19px;
+}
+
+.monthly-return-chart p {
+  margin: 5px 0 0;
+  color: #a1a1aa;
+  font-size: 13px;
+}
+
+.monthly-return-legend {
+  display: flex;
+  gap: 14px;
+  color: #d4d4d8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.monthly-return-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monthly-return-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.monthly-return-legend i.positive,
+.monthly-return-bar.positive {
+  background: #dc4b4b;
+}
+
+.monthly-return-legend i.negative,
+.monthly-return-bar.negative {
+  background: #3f9b55;
+}
+
+.monthly-return-scroll {
+  overflow-x: auto;
+}
+
+.monthly-return-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 14px;
+  min-width: 560px;
+}
+
+.monthly-return-column {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.monthly-return-column > strong {
+  min-height: 18px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.monthly-return-column > span {
+  color: #b7b7bd;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.monthly-return-track {
+  position: relative;
+  height: 180px;
+  border-radius: 12px;
+  background: #242424;
+  overflow: hidden;
+}
+
+.monthly-return-zero {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: #52525b;
+}
+
+.monthly-return-bar {
+  position: absolute;
+  right: 18%;
+  left: 18%;
+  border-radius: 8px 8px 3px 3px;
+}
+
+.monthly-return-bar.positive {
+  bottom: 50%;
+}
+
+.monthly-return-bar.negative {
+  top: 50%;
+  border-radius: 3px 3px 8px 8px;
+}
+
+.monthly-return-bar.neutral {
+  top: calc(50% - 1px);
+  background: #71717a;
+  border-radius: 3px;
+}
+
 .trend-card-top,
 .trend-card-foot {
   display: flex;
@@ -1598,6 +1721,24 @@ td {
   .return-day em,
   .return-week em {
     font-size: clamp(10px, 2.6vw, 12px);
+  }
+
+  .monthly-return-chart {
+    padding: 18px 12px 20px;
+  }
+
+  .monthly-return-chart-header {
+    display: grid;
+    gap: 10px;
+  }
+
+  .monthly-return-bars {
+    gap: 8px;
+    min-width: 460px;
+  }
+
+  .monthly-return-track {
+    height: 150px;
   }
 
   .trend-legend {
